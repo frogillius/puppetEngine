@@ -1,5 +1,6 @@
 # Layout
 Game window is divided into 3 resizeable areas. The order is left to right, then top to bottom. Stats are gotten from a json, referencing an icon from the json. Nothing should be hard coded into display components, to make modding easier.
+The 3 big areas can have their width adjusted, and the components inside can have their hight adjusted.
 <hr>
 
 ## Section 1
