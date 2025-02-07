@@ -1,0 +1,136 @@
+{
+  "encounter": {
+    "portrait": {
+      "puppet": {
+        "bodyParts": {
+          "root": {
+            "image": "https://via.placeholder.com/150?text=Root",
+            "position": { "x": 0, "y": 0 },
+            "rotation": 0,
+            "transformOrigin": "50% 100%",
+            "children": {
+              "neck": {
+                "image": "https://via.placeholder.com/80?text=Neck",
+                "position": { "x": 0, "y": -30 },
+                "rotation": 0,
+                "transformOrigin": "50% 50%",
+                "children": {
+                  "head": {
+                    "image": "https://via.placeholder.com/100?text=Head",
+                    "position": { "x": 0, "y": -50 },
+                    "rotation": 0,
+                    "transformOrigin": "50% 50%"
+                  }
+                }
+              },
+              "lshoulder": {
+                "image": "https://via.placeholder.com/50?text=LShoulder",
+                "position": { "x": -20, "y": -20 },
+                "rotation": 0,
+                "transformOrigin": "50% 50%",
+                "children": {
+                  "lforearm": {
+                    "image": "https://via.placeholder.com/50?text=LForearm",
+                    "position": { "x": -10, "y": -30 },
+                    "rotation": 0,
+                    "transformOrigin": "50% 50%",
+                    "children": {
+                      "lhand": {
+                        "image": "https://via.placeholder.com/30?text=LHand",
+                        "position": { "x": -5, "y": -20 },
+                        "rotation": 0,
+                        "transformOrigin": "50% 50%"
+                      }
+                    }
+                  }
+                }
+              },
+              "rshoulder": {
+                "image": "https://via.placeholder.com/50?text=RShoulder",
+                "position": { "x": 20, "y": -20 },
+                "rotation": 0,
+                "transformOrigin": "50% 50%",
+                "children": {
+                  "rforearm": {
+                    "image": "https://via.placeholder.com/50?text=RForearm",
+                    "position": { "x": 10, "y": -30 },
+                    "rotation": 0,
+                    "transformOrigin": "50% 50%",
+                    "children": {
+                      "rhand": {
+                        "image": "https://via.placeholder.com/30?text=RHand",
+                        "position": { "x": 5, "y": -20 },
+                        "rotation": 0,
+                        "transformOrigin": "50% 50%"
+                      }
+                    }
+                  }
+                }
+              },
+              "tail": {
+                "image": "https://via.placeholder.com/100?text=Tail",
+                "position": { "x": 0, "y": 40 },
+                "rotation": 0,
+                "transformOrigin": "50% 50%"
+              },
+              "torsoclothes": {
+                "image": "https://via.placeholder.com/150?text=Torso+Clothes",
+                "position": { "x": 0, "y": 0 },
+                "rotation": 0,
+                "transformOrigin": "50% 50%"
+              }
+            }
+          }
+        }
+      }
+    },
+    "stats": {
+      "health": 100,
+      "attack": 20,
+      "defense": 15,
+      "icon": "https://via.placeholder.com/30?text=Icon"
+    }
+  },
+  "player": {
+    "portrait": "https://via.placeholder.com/150?text=Player+Puppet",
+    "stats": {
+      "health": 120,
+      "attack": 25,
+      "defense": 20,
+      "icon": "https://via.placeholder.com/30?text=Icon"
+    }
+  },
+  "stage": {
+    "parallax": [
+      { "layer": 1, "image": "https://via.placeholder.com/800x200?text=Layer+1" },
+      { "layer": 2, "image": "https://via.placeholder.com/800x200?text=Layer+2" },
+      { "layer": 3, "image": "https://via.placeholder.com/800x200?text=Layer+3" },
+      { "layer": 4, "image": "https://via.placeholder.com/800x200?text=Layer+4" },
+      { "layer": 5, "image": "https://via.placeholder.com/800x200?text=Layer+5" }
+    ],
+    "puppets": [
+      {
+        "id": "stagePuppet1",
+        "image": "https://via.placeholder.com/100x200?text=Stage+Puppet",
+        "position": { "left": "40%" }
+      }
+    ],
+    "objects": [
+      {
+        "id": "object1",
+        "image": "https://via.placeholder.com/50x50?text=Obj",
+        "position": { "left": "60%" },
+        "clickableAreas": [
+          { "x": 10, "y": 10, "width": 30, "height": 30 }
+        ]
+      }
+    ]
+  },
+  "dialog": {
+    "text": "Welcome to the game! Choose your action:",
+    "buttons": [
+      { "text": "Attack", "action": "attack()" },
+      { "text": "Defend", "action": "defend()" }
+    ]
+  }
+}

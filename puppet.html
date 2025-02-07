@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Puppet Render</title>
+  <style>
+    body { margin: 0; background: transparent; }
+    #puppetContainer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .part { position: absolute; }
+  </style>
+</head>
+<body>
+  <div id="puppetContainer"></div>
+
+  <script>
+    function loadPuppet(configUrl) {
+      fetch(configUrl)
+        .then(response => response.json())
+        .then(config => {
+          const root = document.getElementById('puppetContainer');
+          function buildPart(name, partConfig, parentElem) {
+            const part = document.createElement('img');
+            part.src = partConfig.image;
+            part.classList.add('part');
+            part.style.transform = `translate(${partConfig.position.x}px, ${partConfig.position.y}px) rotate(${partConfig.rotation}deg)`;
+            part.style.transformOrigin = partConfig.transformOrigin;
+            parentElem.appendChild(part);
+
+            if (partConfig.children) {
+              for (let childName in partConfig.children) {
+                buildPart(childName, partConfig.children[childName], part);
+              }
+            }
+          }
+          buildPart("torso", config.puppet.bodyParts.torso, root);
+        });
+    }
+
+    // Get the config URL from query params (allows custom configs)
+    const params = new URLSearchParams(window.location.search);
+    const configUrl = params.get("config") || "config.json";
+    loadPuppet(configUrl);
+  </script>
+</body>
+</html>
