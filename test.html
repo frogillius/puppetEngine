@@ -15,12 +15,17 @@
     #gameWindow {
       display: flex;
       height: 100%;
+      padding: 10px; /* Add padding around the main container */
+      box-sizing: border-box; /* Include padding in the element's total width and height */
     }
     /* Each section styles */
     .section {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      border-radius: 10px; /* Rounded corners */
+      padding: 10px; /* Add padding inside each section */
+      box-sizing: border-box; /* Include padding in the element's total width and height */
     }
     /* Encounter and player areas: portrait on top, stats below */
     .portrait {
@@ -28,26 +33,37 @@
       background: #eee;
       text-align: center;
       padding: 5px;
+      border-radius: 10px; /* Rounded corners */
     }
     .stats {
       flex: 1;
       overflow: auto;
       padding: 5px;
+      border-radius: 10px; /* Rounded corners */
     }
     /* Stage area layout: stage on top, dialog on bottom */
     #stage {
       display: flex;
       flex-direction: column;
+      border-radius: 10px; /* Rounded corners */
+      padding: 10px; /* Add padding inside the stage area */
+      box-sizing: border-box; /* Include padding in the element's total width and height */
     }
     #stageArea {
       position: relative;
       background: #ddd;
       overflow: hidden;
+      border-radius: 10px; /* Rounded corners */
+      padding: 10px; /* Add padding inside the stage area */
+      box-sizing: border-box; /* Include padding in the element's total width and height */
+      margin-bottom: 10px
     }
     #dialog {
       background: #bbb;
       padding: 10px;
       overflow: auto;
+      border-radius: 10px; /* Rounded corners */
+      margin-top: 10px; /* Add margin to create space between stage and dialog */
     }
     /* Parallax layers and puppets */
     .parallax-layer {
@@ -58,21 +74,30 @@
       height: 100%;
       background-repeat: repeat-x;
       background-position: center;
+      border-radius: 10px; /* Rounded corners */
     }
     .stage-puppet {
       position: absolute;
       bottom: 0;
       transition: transform 0.3s;
+      border-radius: 10px; /* Rounded corners */
     }
     .portrait-puppet {
       max-width: 100%;
       height: auto;
+      border-radius: 10px; /* Rounded corners */
+    }
+    .encounterPortrait {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px; /* Rounded corners */
     }
     /* Styling for Split.js gutters */
     .gutter {
       background-color: #aaa;
       background-repeat: no-repeat;
       background-position: 50%;
+      border-radius: 10px; /* Rounded corners */
     }
     .gutter.gutter-horizontal {
       cursor: ew-resize;
@@ -86,8 +111,7 @@
   <div id="gameWindow">
     <!-- Section 1: Encounter Area -->
     <div id="encounter" class="section">
-      <div class="portrait" id="encounterPortrait"><iframe src="puppet.html?config=fallback.json" width="300" height="300" style="border: none;"></iframe>
-</div>
+      <div class="portrait" id="encounterPortrait"><iframe src="puppet.html?config=fallback.json" width="300" height="300" style="border: none;"></iframe></div>
       <div class="stats" id="encounterStats"></div>
     </div>
 
