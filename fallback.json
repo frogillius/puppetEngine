@@ -4,28 +4,28 @@
       "puppet": {
         "bodyParts": {
           "root": {
-            "image": "assets/example/root/root.png",
-            "params": "assets/example/root/root_params.json",
+            "image": "http://localhost:6969/assets/example/root/root.png",
+            "params": "http://localhost:6969/assets/example/root/root_params.json",
             "children": {
               "neck": {
-                "image": "assets/example/root/neck/neck.png",
-                "params": "assets/example/root/neck/neck_params.json",
+                "image": "http://localhost:6969/assets/example/root/neck/neck.png",
+                "params": "http://localhost:6969/assets/example/root/neck/neck_params.json",
                 "children": {
                   "head": {
-                    "image": "assets/example/root/neck/head/head.png",
-                    "params": "assets/example/root/neck/head/head_params.json",
+                    "image": "http://localhost:6969/assets/example/root/neck/head/head.png",
+                    "params": "http://localhost:6969/assets/example/root/neck/head/head_params.json",
                     "children": {
                       "eyes": {
-                        "image": "assets/example/root/neck/head/eyes/eyes.png",
-                        "params": "assets/example/root/neck/head/eyes/eyes_params.json",
+                        "image": "http://localhost:6969/assets/example/root/neck/head/eyes/eyes.png",
+                        "params": "http://localhost:6969/assets/example/root/neck/head/eyes/eyes_params.json",
                         "children": {
                           "leye": {
-                            "image": "assets/example/root/neck/head/eyes/eyeL/leye.png",
-                            "params": "assets/example/root/neck/head/eyes/eyeL/leye.json"
+                            "image": "http://localhost:6969/assets/example/root/neck/head/eyes/eyeL/leye.png",
+                            "params": "http://localhost:6969/assets/example/root/neck/head/eyes/eyeL/leye.json"
                           },
                           "reye": {
-                            "image": "assets/example/root/neck/head/eyes/eyeR/reye.png",
-                            "params": "assets/example/root/neck/head/eyes/eyeR/reye.json"
+                            "image": "http://localhost:6969/assets/example/root/neck/head/eyes/eyeR/reye.png",
+                            "params": "http://localhost:6969/assets/example/root/neck/head/eyes/eyeR/reye.json"
                           }
                         }
                       }
@@ -34,44 +34,44 @@
                 }
               },
               "lshoulder": {
-                "image": "assets/example/root/lshoulder/lshoulder.png",
-                "params": "assets/example/root/lshoulder/lshoulder_params.json",
+                "image": "http://localhost:6969/assets/example/root/lshoulder/lshoulder.png",
+                "params": "http://localhost:6969/assets/example/root/lshoulder/lshoulder_params.json",
                 "children": {
                   "lforearm": {
-                    "image": "assets/example/root/lshoulder/lforearm/lforearm.png",
-                    "params": "assets/example/root/lshoulder/lforearm/lforearm_params.json",
+                    "image": "http://localhost:6969/assets/example/root/lshoulder/lforearm/lforearm.png",
+                    "params": "http://localhost:6969/assets/example/root/lshoulder/lforearm/lforearm_params.json",
                     "children": {
                       "lhand": {
-                        "image": "assets/example/root/lshoulder/lforearm/lhand/lhand.png",
-                        "params": "assets/example/root/lshoulder/lforearm/lhand/lhand_params.json"
+                        "image": "http://localhost:6969/assets/example/root/lshoulder/lforearm/lhand/lhand.png",
+                        "params": "http://localhost:6969/assets/example/root/lshoulder/lforearm/lhand/lhand_params.json"
                       }
                     }
                   }
                 }
               },
               "rshoulder": {
-                "image": "assets/example/root/rshoulder/rshoulder.png",
-                "params": "assets/example/root/rshoulder/rshoulder_params.json",
+                "image": "http://localhost:6969/assets/example/root/rshoulder/rshoulder.png",
+                "params": "http://localhost:6969/assets/example/root/rshoulder/rshoulder_params.json",
                 "children": {
                   "rforearm": {
-                    "image": "assets/example/root/rshoulder/rforearm/rforearm.png",
-                    "params": "assets/example/root/rshoulder/rforearm/rforearm_params.json",
+                    "image": "http://localhost:6969/assets/example/root/rshoulder/rforearm/rforearm.png",
+                    "params": "http://localhost:6969/assets/example/root/rshoulder/rforearm/rforearm_params.json",
                     "children": {
                       "rhand": {
-                        "image": "assets/example/root/rshoulder/rforearm/rhand/rhand.png",
-                        "params": "assets/example/root/rshoulder/rforearm/rhand/rhand_params.json"
+                        "image": "http://localhost:6969/assets/example/root/rshoulder/rforearm/rhand/rhand.png",
+                        "params": "http://localhost:6969/assets/example/root/rshoulder/rforearm/rhand/rhand_params.json"
                       }
                     }
                   }
                 }
               },
               "tail": {
-                "image": "assets/example/root/tail/tail.png",
-                "params": "assets/example/root/tail/tail_params.json"
+                "image": "http://localhost:6969/assets/example/root/tail/tail.png",
+                "params": "http://localhost:6969/assets/example/root/tail/tail_params.json"
               },
               "torsoclothes": {
-                "image": "assets/example/root/torsoclothes/torsoclothes.png",
-                "params": "assets/example/root/torsoclothes/torsoclothes_params.json"
+                "image": "http://localhost:6969/assets/example/root/torsoclothes/torsoclothes.png",
+                "params": "http://localhost:6969/assets/example/root/torsoclothes/torsoclothes_params.json"
               }
             }
           }
