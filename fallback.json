@@ -20,12 +20,12 @@
                         "params": "assets/example/root/neck/head/eyes/eyes_params.json",
                         "children": {
                           "leye": {
-                            "image": "assets/example/root/neck/head/eyes/leye/leye.png",
-                            "params": "assets/example/root/neck/head/eyes/leye/leye_params.json"
+                            "image": "assets/example/root/neck/head/eyes/eyeL/leye.png",
+                            "params": "assets/example/root/neck/head/eyes/eyeL/leye.json"
                           },
                           "reye": {
-                            "image": "assets/example/root/neck/head/eyes/reye/reye.png",
-                            "params": "assets/example/root/neck/head/eyes/reye/reye_params.json"
+                            "image": "assets/example/root/neck/head/eyes/eyeR/reye.png",
+                            "params": "assets/example/root/neck/head/eyes/eyeR/reye.json"
                           }
                         }
                       }
