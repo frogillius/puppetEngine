@@ -5,40 +5,44 @@
         "bodyParts": {
           "root": {
             "image": "assets/example/root/root.png",
-            "position": { "x": 0, "y": 0 },
-            "rotation": 0,
             "params": "assets/example/root/root_params.json",
             "children": {
               "neck": {
                 "image": "assets/example/root/neck/neck.png",
-                "position": { "x": 0, "y": -30 },
-                "rotation": 0,
                 "params": "assets/example/root/neck/neck_params.json",
                 "children": {
                   "head": {
                     "image": "assets/example/root/neck/head/head.png",
-                    "position": { "x": 0, "y": -50 },
-                    "rotation": 0,
-                    "params": "assets/example/root/neck/head/head_params.json"
+                    "params": "assets/example/root/neck/head/head_params.json",
+                    "children": {
+                      "eyes": {
+                        "image": "assets/example/root/neck/head/eyes/eyes.png",
+                        "params": "assets/example/root/neck/head/eyes/eyes_params.json",
+                        "children": {
+                          "leye": {
+                            "image": "assets/example/root/neck/head/eyes/leye/leye.png",
+                            "params": "assets/example/root/neck/head/eyes/leye/leye_params.json"
+                          },
+                          "reye": {
+                            "image": "assets/example/root/neck/head/eyes/reye/reye.png",
+                            "params": "assets/example/root/neck/head/eyes/reye/reye_params.json"
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               },
               "lshoulder": {
                 "image": "assets/example/root/lshoulder/lshoulder.png",
-                "position": { "x": -20, "y": -20 },
-                "rotation": 0,
                 "params": "assets/example/root/lshoulder/lshoulder_params.json",
                 "children": {
                   "lforearm": {
                     "image": "assets/example/root/lshoulder/lforearm/lforearm.png",
-                    "position": { "x": -10, "y": -30 },
-                    "rotation": 0,
                     "params": "assets/example/root/lshoulder/lforearm/lforearm_params.json",
                     "children": {
                       "lhand": {
                         "image": "assets/example/root/lshoulder/lforearm/lhand/lhand.png",
-                        "position": { "x": -5, "y": -20 },
-                        "rotation": 0,
                         "params": "assets/example/root/lshoulder/lforearm/lhand/lhand_params.json"
                       }
                     }
@@ -47,20 +51,14 @@
               },
               "rshoulder": {
                 "image": "assets/example/root/rshoulder/rshoulder.png",
-                "position": { "x": 20, "y": -20 },
-                "rotation": 0,
                 "params": "assets/example/root/rshoulder/rshoulder_params.json",
                 "children": {
                   "rforearm": {
                     "image": "assets/example/root/rshoulder/rforearm/rforearm.png",
-                    "position": { "x": 10, "y": -30 },
-                    "rotation": 0,
                     "params": "assets/example/root/rshoulder/rforearm/rforearm_params.json",
                     "children": {
                       "rhand": {
                         "image": "assets/example/root/rshoulder/rforearm/rhand/rhand.png",
-                        "position": { "x": 5, "y": -20 },
-                        "rotation": 0,
                         "params": "assets/example/root/rshoulder/rforearm/rhand/rhand_params.json"
                       }
                     }
@@ -69,14 +67,10 @@
               },
               "tail": {
                 "image": "assets/example/root/tail/tail.png",
-                "position": { "x": 0, "y": 40 },
-                "rotation": 0,
                 "params": "assets/example/root/tail/tail_params.json"
               },
               "torsoclothes": {
                 "image": "assets/example/root/torsoclothes/torsoclothes.png",
-                "position": { "x": 0, "y": 0 },
-                "rotation": 0,
                 "params": "assets/example/root/torsoclothes/torsoclothes_params.json"
               }
             }
