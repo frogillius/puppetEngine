@@ -4,19 +4,19 @@
       "puppet": {
         "bodyParts": {
           "root": {
-            "image": "https://via.placeholder.com/150?text=Root",
+            "image": "assets/example/root/root.png",
             "position": { "x": 0, "y": 0 },
             "rotation": 0,
             "transformOrigin": "50% 100%",
             "children": {
               "neck": {
-                "image": "https://via.placeholder.com/80?text=Neck",
+                "image": "assets/example/root/neck/neck.png",
                 "position": { "x": 0, "y": -30 },
                 "rotation": 0,
                 "transformOrigin": "50% 50%",
                 "children": {
                   "head": {
-                    "image": "https://via.placeholder.com/100?text=Head",
+                    "image": "assets/example/root/neck/head/head.png",
                     "position": { "x": 0, "y": -50 },
                     "rotation": 0,
                     "transformOrigin": "50% 50%"
@@ -24,19 +24,19 @@
                 }
               },
               "lshoulder": {
-                "image": "https://via.placeholder.com/50?text=LShoulder",
+                "image": "assets/example/root/lshoulder/lshoulder.png",
                 "position": { "x": -20, "y": -20 },
                 "rotation": 0,
                 "transformOrigin": "50% 50%",
                 "children": {
                   "lforearm": {
-                    "image": "https://via.placeholder.com/50?text=LForearm",
+                    "image": "assets/example/root/lshoulder/lforearm/lforearm.png",
                     "position": { "x": -10, "y": -30 },
                     "rotation": 0,
                     "transformOrigin": "50% 50%",
                     "children": {
                       "lhand": {
-                        "image": "https://via.placeholder.com/30?text=LHand",
+                        "image": "assets/example/root/lshoulder/lforearm/lhand/lhand.png",
                         "position": { "x": -5, "y": -20 },
                         "rotation": 0,
                         "transformOrigin": "50% 50%"
@@ -46,19 +46,19 @@
                 }
               },
               "rshoulder": {
-                "image": "https://via.placeholder.com/50?text=RShoulder",
+                "image": "assets/example/root/rshoulder/rshoulder.png",
                 "position": { "x": 20, "y": -20 },
                 "rotation": 0,
                 "transformOrigin": "50% 50%",
                 "children": {
                   "rforearm": {
-                    "image": "https://via.placeholder.com/50?text=RForearm",
+                    "image": "assets/example/root/rshoulder/rforearm/rforearm.png",
                     "position": { "x": 10, "y": -30 },
                     "rotation": 0,
                     "transformOrigin": "50% 50%",
                     "children": {
                       "rhand": {
-                        "image": "https://via.placeholder.com/30?text=RHand",
+                        "image": "assets/example/root/rshoulder/rforearm/rhand/rhand.png",
                         "position": { "x": 5, "y": -20 },
                         "rotation": 0,
                         "transformOrigin": "50% 50%"
@@ -68,13 +68,13 @@
                 }
               },
               "tail": {
-                "image": "https://via.placeholder.com/100?text=Tail",
+                "image": "assets/example/root/tail/tail.png",
                 "position": { "x": 0, "y": 40 },
                 "rotation": 0,
                 "transformOrigin": "50% 50%"
               },
               "torsoclothes": {
-                "image": "https://via.placeholder.com/150?text=Torso+Clothes",
+                "image": "assets/example/root/torsoclothes/torsoclothes.png",
                 "position": { "x": 0, "y": 0 },
                 "rotation": 0,
                 "transformOrigin": "50% 50%"
@@ -88,49 +88,16 @@
       "health": 100,
       "attack": 20,
       "defense": 15,
-      "icon": "https://via.placeholder.com/30?text=Icon"
+      "icon": "assets/example/root/icon.png"
     }
   },
   "player": {
-    "portrait": "https://via.placeholder.com/150?text=Player+Puppet",
+    "portrait": "assets/example/player/player_puppet.png",
     "stats": {
       "health": 120,
       "attack": 25,
       "defense": 20,
-      "icon": "https://via.placeholder.com/30?text=Icon"
+      "icon": "assets/example/player/icon.png"
     }
-  },
-  "stage": {
-    "parallax": [
-      { "layer": 1, "image": "https://via.placeholder.com/800x200?text=Layer+1" },
-      { "layer": 2, "image": "https://via.placeholder.com/800x200?text=Layer+2" },
-      { "layer": 3, "image": "https://via.placeholder.com/800x200?text=Layer+3" },
-      { "layer": 4, "image": "https://via.placeholder.com/800x200?text=Layer+4" },
-      { "layer": 5, "image": "https://via.placeholder.com/800x200?text=Layer+5" }
-    ],
-    "puppets": [
-      {
-        "id": "stagePuppet1",
-        "image": "https://via.placeholder.com/100x200?text=Stage+Puppet",
-        "position": { "left": "40%" }
-      }
-    ],
-    "objects": [
-      {
-        "id": "object1",
-        "image": "https://via.placeholder.com/50x50?text=Obj",
-        "position": { "left": "60%" },
-        "clickableAreas": [
-          { "x": 10, "y": 10, "width": 30, "height": 30 }
-        ]
-      }
-    ]
-  },
-  "dialog": {
-    "text": "Welcome to the game! Choose your action:",
-    "buttons": [
-      { "text": "Attack", "action": "attack()" },
-      { "text": "Defend", "action": "defend()" }
-    ]
   }
 }
