@@ -1,85 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Puppet Render</title>
-  <style>
-    body { margin: 0; background: transparent; }
-    #puppetContainer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .part { position: absolute; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Puppet</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #222; }
+        #container { position: relative; width: 100%; height: 100%; }
+        canvas { display: block; position: absolute; top: 0; left: 0; }
+    </style>
 </head>
 <body>
-  <div id="puppetContainer"></div>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+        const SCALE = 1.0; // Change scale factor here
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        const JSON_URL = getQueryParam("config") || "http://localhost:6969/fallback.json"; // Get config from URL or use fallback
+        const CANVAS_WIDTH = parseInt(getQueryParam("width")) || container.clientWidth;
+        const CANVAS_HEIGHT = parseInt(getQueryParam("height")) || container.clientHeight;
 
-  <script>
-    function loadPuppet(configUrl) {
-      fetch(configUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.statusText}`);
-          }
-          return response.json();
-        })
-        .then(config => {
-          console.log(config); // Log the entire config object
-          const root = document.getElementById('puppetContainer');
-          function buildPart(name, partConfig, parentElem) {
-            fetch(partConfig.params)
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error(`Network response was not ok: ${response.statusText}`);
+        const container = document.getElementById("container");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        function resizeCanvas() {
+            canvas.width = CANVAS_WIDTH;
+            canvas.height = CANVAS_HEIGHT;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        async function loadJSON(url) {
+            const response = await fetch(url);
+            return response.json();
+        }
+
+        async function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = src;
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+            });
+        }
+
+        async function loadPuppet() {
+            const data = await loadJSON(JSON_URL);
+            const root = data.encounter.portrait.puppet.bodyParts.root;
+            await renderPart(root, canvas.width / 2, canvas.height / 2, 0);
+        }
+
+        async function renderPart(part, x, y, parentRotation) {
+            const img = await loadImage(part.image);
+            const params = await loadJSON(part.params);
+            
+            const { xOffset = 0, yOffset = 0, rotation = 0 } = params;
+            const newRotation = parentRotation + rotation;
+            const newX = x + xOffset * SCALE;
+            const newY = y + yOffset * SCALE;
+            
+            ctx.save();
+            ctx.translate(newX, newY);
+            ctx.rotate(newRotation * Math.PI / 180);
+            ctx.drawImage(img, -img.width / 2 * SCALE, -img.height / 2 * SCALE, img.width * SCALE, img.height * SCALE);
+            ctx.restore();
+            
+            if (part.children) {
+                for (const childKey in part.children) {
+                    await renderPart(part.children[childKey], newX, newY, newRotation);
                 }
-                return response.json();
-              })
-              .then(params => {
-                const part = document.createElement('img');
-                part.src = partConfig.image;
-                part.classList.add('part');
-                part.style.transform = `translate(${params.position.x}px, ${params.position.y}px) rotate(${params.rotation}deg)`;
-                part.style.transformOrigin = params.transformOrigin;
-                parentElem.appendChild(part);
+            }
+        }
 
-                if (partConfig.children) {
-                  for (let childName in partConfig.children) {
-                    buildPart(childName, partConfig.children[childName], part);
-                  }
-                }
-              })
-              .catch(error => {
-                console.error(`Failed to load part params: ${error}`);
-                const part = document.createElement('img');
-                part.src = `http://localhost:6969/assets/crap/crap.png`;
-                part.classList.add('part');
-                part.style.transform = `translate(0px, 0px) rotate(0deg)`;
-                part.style.transformOrigin = '50% 50%';
-                parentElem.appendChild(part);
-              });
-          }
-          console.log(config.encounter.portrait.puppet.bodyParts.root);
-          buildPart("root", config.encounter.portrait.puppet.bodyParts.root, root);
-        })
-        .catch(error => {
-          console.error(`Failed to load config: ${error}`);
-          const root = document.getElementById('puppetContainer');
-          const part = document.createElement('img');
-          part.src = `http://localhost:6969/assets/crap/crap.png`;
-          part.classList.add('part');
-          part.style.transform = `translate(0px, 0px) rotate(0deg)`;
-          part.style.transformOrigin = '50% 50%';
-          root.appendChild(part);
-        });
-    }
-
-    // Get the config URL from query params (allows custom configs)
-    const params = new URLSearchParams(window.location.search);
-    const configUrl = params.get("config") || "fallback.json";
-    loadPuppet(configUrl);
-  </script>
+        loadPuppet();
+    </script>
 </body>
 </html>

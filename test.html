@@ -91,10 +91,11 @@
       max-width: 100%;
       height: auto;
       border-radius: 10px; /* Rounded corners */
+      margin-right: 10px
     }
     /* Styling for Split.js gutters */
     .gutter {
-      background-color: #aaa;
+      background-color: #f0f0f0;
       background-repeat: no-repeat;
       background-position: 50%;
       border-radius: 10px; /* Rounded corners */
@@ -111,7 +112,9 @@
   <div id="gameWindow">
     <!-- Section 1: Encounter Area -->
     <div id="encounter" class="section">
-      <div class="portrait" id="encounterPortrait"><iframe src="puppet.html?config=fallback.json" width="300" height="300" style="border: none;"></iframe></div>
+      <div class="portrait" id="encounterPortrait">
+        <iframe src="puppet.html?config=fallback.json&width=100%&height=300px" width="100%" height="300px" scrolling="no" style="border: none;"></iframe>
+      </div>
       <div class="stats" id="encounterStats"></div>
     </div>
 
