@@ -43,7 +43,7 @@
 
     // Get the config URL from query params (allows custom configs)
     const params = new URLSearchParams(window.location.search);
-    const configUrl = params.get("config") || "config.json";
+    const configUrl = params.get("config") || "fallback.json";
     loadPuppet(configUrl);
   </script>
 </body>
