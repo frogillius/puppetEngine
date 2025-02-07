@@ -1,7 +1,7 @@
 # Layout
 Game window is divided into 3 resizeable areas. The order is left to right, then top to bottom. Stats are gotten from a json, referencing an icon from the json. Nothing should be hard coded into display components, to make modding easier.
 ## Section 1
-Section 1 is the encounters area. Portrait puppet on top. Stats below puppet
+Section 1 is the encounters area. Portrait puppet on top. Stats below puppet. <br>
 It will display the portrait and stats of the current encounter. The portrait contains the portrait puppet.
 
 ## Section 2
