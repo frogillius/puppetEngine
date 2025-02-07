@@ -1,0 +1,29 @@
+{
+  "encounters": [
+    {
+      "id": 1,
+      "name": "Goblin",
+      "portrait": "assets/images/goblin.png",
+      "stats": {
+        "health": 30,
+        "attack": 5,
+        "defense": 2
+      }
+    },
+    {
+      "id": 2,
+      "name": "Orc",
+      "portrait": "assets/images/orc.png",
+      "stats": {
+        "health": 50,
+        "attack": 8,
+        "defense": 5
+      }
+    }
+  ],
+  "icons": {
+    "health": "assets/icons/health.png",
+    "attack": "assets/icons/attack.png",
+    "defense": "assets/icons/defense.png"
+  }
+}
