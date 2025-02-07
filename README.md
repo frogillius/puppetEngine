@@ -25,12 +25,12 @@ game-window-layout
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/frogillius/puppetEngine
    ```
 
 2. Navigate to the project directory:
    ```
-   cd game-window-layout
+   cd puppetEngine
    ```
 
 3. Install the dependencies:
