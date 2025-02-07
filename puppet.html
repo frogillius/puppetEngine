@@ -20,12 +20,23 @@
   <script>
     function loadPuppet(configUrl) {
       fetch(configUrl)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+          }
+          return response.json();
+        })
         .then(config => {
+          console.log(config); // Log the entire config object
           const root = document.getElementById('puppetContainer');
           function buildPart(name, partConfig, parentElem) {
             fetch(partConfig.params)
-              .then(response => response.json())
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Network response was not ok: ${response.statusText}`);
+                }
+                return response.json();
+              })
               .then(params => {
                 const part = document.createElement('img');
                 part.src = partConfig.image;
@@ -39,9 +50,29 @@
                     buildPart(childName, partConfig.children[childName], part);
                   }
                 }
+              })
+              .catch(error => {
+                console.error(`Failed to load part params: ${error}`);
+                const part = document.createElement('img');
+                part.src = `http://localhost:6969/assets/crap/crap.png`;
+                part.classList.add('part');
+                part.style.transform = `translate(0px, 0px) rotate(0deg)`;
+                part.style.transformOrigin = '50% 50%';
+                parentElem.appendChild(part);
               });
           }
-          buildPart("root", encounter.portrait.puppet.bodyParts.root, root);
+          console.log(config.encounter.portrait.puppet.bodyParts.root);
+          buildPart("root", config.encounter.portrait.puppet.bodyParts.root, root);
+        })
+        .catch(error => {
+          console.error(`Failed to load config: ${error}`);
+          const root = document.getElementById('puppetContainer');
+          const part = document.createElement('img');
+          part.src = `http://localhost:6969/assets/crap/crap.png`;
+          part.classList.add('part');
+          part.style.transform = `translate(0px, 0px) rotate(0deg)`;
+          part.style.transformOrigin = '50% 50%';
+          root.appendChild(part);
         });
     }
 
