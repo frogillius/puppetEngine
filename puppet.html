@@ -24,20 +24,24 @@
         .then(config => {
           const root = document.getElementById('puppetContainer');
           function buildPart(name, partConfig, parentElem) {
-            const part = document.createElement('img');
-            part.src = partConfig.image;
-            part.classList.add('part');
-            part.style.transform = `translate(${partConfig.position.x}px, ${partConfig.position.y}px) rotate(${partConfig.rotation}deg)`;
-            part.style.transformOrigin = partConfig.transformOrigin;
-            parentElem.appendChild(part);
+            fetch(partConfig.params)
+              .then(response => response.json())
+              .then(params => {
+                const part = document.createElement('img');
+                part.src = partConfig.image;
+                part.classList.add('part');
+                part.style.transform = `translate(${params.position.x}px, ${params.position.y}px) rotate(${params.rotation}deg)`;
+                part.style.transformOrigin = params.transformOrigin;
+                parentElem.appendChild(part);
 
-            if (partConfig.children) {
-              for (let childName in partConfig.children) {
-                buildPart(childName, partConfig.children[childName], part);
-              }
-            }
+                if (partConfig.children) {
+                  for (let childName in partConfig.children) {
+                    buildPart(childName, partConfig.children[childName], part);
+                  }
+                }
+              });
           }
-          buildPart("torso", config.puppet.bodyParts.torso, root);
+          buildPart("root", config.puppet.bodyParts.root, root);
         });
     }
 
