@@ -3,125 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Game Layout with Custom Default Sizes</title>
-  <style>
-    /* Reset and full-window container */
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-    }
-    /* Main container with 3 sections arranged horizontally */
-    #gameWindow {
-      display: flex;
-      height: 100%;
-      padding: 10px; /* Add padding around the main container */
-      box-sizing: border-box; /* Include padding in the element's total width and height */
-    }
-    /* Each section styles */
-    .section {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border-radius: 10px; /* Rounded corners */
-      padding: 10px; /* Add padding inside each section */
-      box-sizing: border-box; /* Include padding in the element's total width and height */
-    }
-    /* Encounter and player areas: portrait on top, stats below */
-    .portrait {
-      flex: none;
-      background: #eee;
-      text-align: center;
-      padding: 5px;
-      border-radius: 10px; /* Rounded corners */
-    }
-    .stats {
-      flex: 1;
-      overflow: auto;
-      padding: 5px;
-      border-radius: 10px; /* Rounded corners */
-    }
-    /* Stage area layout: stage on top, dialog on bottom */
-    #stage {
-      display: flex;
-      flex-direction: column;
-      border-radius: 10px; /* Rounded corners */
-      padding: 10px; /* Add padding inside the stage area */
-      box-sizing: border-box; /* Include padding in the element's total width and height */
-    }
-    #stageArea {
-      position: relative;
-      background: #ddd;
-      overflow: hidden;
-      border-radius: 10px; /* Rounded corners */
-      padding: 10px; /* Add padding inside the stage area */
-      box-sizing: border-box; /* Include padding in the element's total width and height */
-      margin-bottom: 10px
-    }
-    #dialog {
-      background: #bbb;
-      padding: 10px;
-      overflow: auto;
-      border-radius: 10px; /* Rounded corners */
-      margin-top: 10px; /* Add margin to create space between stage and dialog */
-    }
-    /* Parallax layers and puppets */
-    .parallax-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-repeat: repeat-x;
-      background-position: center;
-      border-radius: 10px; /* Rounded corners */
-    }
-    .stage-puppet {
-      position: absolute;
-      bottom: 0;
-      transition: transform 0.3s;
-      border-radius: 10px; /* Rounded corners */
-    }
-    .portrait-puppet {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px; /* Rounded corners */
-    }
-    #encounterPortrait {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px; /* Rounded corners */
-      padding: 10px;
-      border: "no";
-    }
-    #playerPortrait {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px; /* Rounded corners */
-      padding: 10px;
-      border: "no";
-    }
-    /* Styling for Split.js gutters */
-    .gutter {
-      background-color: #f0f0f0;
-      background-repeat: no-repeat;
-      background-position: 50%;
-      border-radius: 10px; /* Rounded corners */
-    }
-    .gutter.gutter-horizontal {
-      cursor: ew-resize;
-    }
-    .gutter.gutter-vertical {
-      cursor: ns-resize;
-    }
-  </style>
+  <link rel="stylesheet" href="http://localhost:6969/static/themes/cobolt.css">
+
 </head>
 <body>
   <div id="gameWindow">
     <!-- Section 1: Encounter Area -->
     <div id="encounter" class="section">
       <div class="portrait" id="encounterPortrait">
-        <iframe id="encounterIframe" src="portrait-all.html?config=fallback.json&width=100%&height=100%" width="100%" height="275px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
+        <iframe id="encounterIframe" src="portrait-all.html?config=fallback.json&width=100%&height=100%" width="100%" height="300px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
       </div>
       <div class="stats" id="encounterStats"></div>
     </div>
@@ -129,7 +19,7 @@
     <!-- Section 2: Stage Area (includes stage and dialog) -->
     <div id="stage" class="section">
       <div id="stageArea">
-        <iframe id="stageIframe" src="stage.html?config=assets/rooms/test/test-room.json" width="100%" height="275px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
+        <iframe id="stageIframe" src="stage.html?config=assets/rooms/test/test-room.json" width="100%" height="300px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
       </div>
       <div id="dialog"></div>
     </div>
@@ -137,7 +27,7 @@
     <!-- Section 3: Player Area -->
     <div id="player" class="section">
       <div class="portrait" id="playerPortrait">
-        <iframe src="puppet.html?config=fallback.json&width=100%&height=300px" width="100%" height="300px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
+        <iframe id="playerIframe" src="portrait-all.html?config=fallback.json&width=100%&height=100%" width="100%" height="300px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
       </div>
       <div class="stats" id="playerStats"></div>
     </div>
@@ -149,7 +39,6 @@
     // JSON configuration for modding (could be replaced with an external JSON fetch)
     const jsonData = {
       "encounter": {
-        "portrait": "https://via.placeholder.com/150?text=Encounter+Puppet",
         "stats": {
           "health": 100,
           "attack": 20,
@@ -158,7 +47,6 @@
         }
       },
       "player": {
-        "portrait": "https://via.placeholder.com/150?text=Player+Puppet",
         "stats": {
           "health": 120,
           "attack": 25,
@@ -197,14 +85,66 @@
       }
     };
 
+    const iframe_e = document.getElementById('encounterIframe'); // encounter
+    const iframe_p = document.getElementById('encounterIframe'); // player
+    const iframe_s = document.getElementById('encounterIframe'); // stage
+
+   // Wait for the iframe to load completely
+   iframe_e.onload = () => {
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        const iframeCanvas = iframeDocument.getElementById('sc-canvas');
+
+        if (iframeCanvas) {
+            // Transfer the content of iframe's canvas to OffscreenCanvas
+            const offscreenCanvas = iframeCanvas.transferControlToOffscreen();
+
+            // Send the OffscreenCanvas to the worker
+            const worker = new Worker('offscreen-worker.js');
+            worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
+
+            worker.onmessage = function(event) {
+               console.log('Worker response:', event.data);
+           };
+       }
+    };
+    iframe_p.onload = () => {
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        const iframeCanvas = iframeDocument.getElementById('sc-canvas');
+
+        if (iframeCanvas) {
+            // Transfer the content of iframe's canvas to OffscreenCanvas
+            const offscreenCanvas = iframeCanvas.transferControlToOffscreen();
+
+            // Send the OffscreenCanvas to the worker
+            const worker = new Worker('offscreen-worker.js');
+            worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
+
+            worker.onmessage = function(event) {
+               console.log('Worker response:', event.data);
+           };
+       }
+    };
+    iframe_s.onload = () => {
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        const iframeCanvas = iframeDocument.getElementById('sc-canvas');
+
+        if (iframeCanvas) {
+            // Transfer the content of iframe's canvas to OffscreenCanvas
+            const offscreenCanvas = iframeCanvas.transferControlToOffscreen();
+
+            // Send the OffscreenCanvas to the worker
+            const worker = new Worker('offscreen-worker.js');
+            worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
+
+            worker.onmessage = function(event) {
+               console.log('Worker response:', event.data);
+           };
+       }
+    };
+
+
     // Build the encounter area based on JSON data
     function initEncounter() {
-      const encounterPortraitDiv = document.getElementById('encounterPortrait');
-      const imgEncounter = document.createElement('img');
-      imgEncounter.src = jsonData.encounter.portrait;
-      imgEncounter.alt = "Encounter Portrait";
-      imgEncounter.classList.add('portrait-puppet');
-      encounterPortraitDiv.appendChild(imgEncounter);
 
       const encounterStatsDiv = document.getElementById('encounterStats');
       const stats = jsonData.encounter.stats;
@@ -224,12 +164,6 @@
 
     // Build the player area based on JSON data
     function initPlayer() {
-      const playerPortraitDiv = document.getElementById('playerPortrait');
-      const imgPlayer = document.createElement('img');
-      imgPlayer.src = jsonData.player.portrait;
-      imgPlayer.alt = "Player Portrait";
-      imgPlayer.classList.add('portrait-puppet');
-      playerPortraitDiv.appendChild(imgPlayer);
 
       const playerStatsDiv = document.getElementById('playerStats');
       const stats = jsonData.player.stats;
