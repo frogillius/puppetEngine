@@ -121,14 +121,16 @@
     <!-- Section 1: Encounter Area -->
     <div id="encounter" class="section">
       <div class="portrait" id="encounterPortrait">
-        <iframe src="portrait-all.html?config=fallback.json&width=100%&height=100%" width="100%" height="275px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
+        <iframe id="encounterIframe" src="portrait-all.html?config=fallback.json&width=100%&height=100%" width="100%" height="275px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
       </div>
       <div class="stats" id="encounterStats"></div>
     </div>
 
     <!-- Section 2: Stage Area (includes stage and dialog) -->
     <div id="stage" class="section">
-      <div id="stageArea"></div>
+      <div id="stageArea">
+        <iframe id="stageIframe" src="stage.html?config=assets/rooms/test/test-room.json" width="100%" height="275px" scrolling="no" style="border-radius: 10px; border: none;"></iframe>
+      </div>
       <div id="dialog"></div>
     </div>
 
@@ -344,6 +346,15 @@
         minSize: [50, 50],
         sizes: [stageAreaPercent, dialogPercent]
       });
+      const iframe = document.getElementById('stageIframe');
+      setInterval(keepIframeFocused, 100);
+
+    // Function to keep the iframe focused
+    function keepIframeFocused() {
+      if (document.activeElement !== iframe) {
+        iframe.focus();
+      }
+    }
     }
   </script>
 </body>
