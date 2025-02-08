@@ -21,3 +21,12 @@ Puppets are as they say they are, a dynamic and posable representation of an abr
 Full body. Animated for walk cycles and interactions
 ### Portrait puppet
 Bust portrait. Shows more nuanced emotion and tone during dialog.
+
+
+# other info
+## art size
+Big parts (head, root, tail, hair) are 32x32
+limbs are 16x32 (including neck)
+breasts are 16x32
+hands and feet are 16x16
+facial features 16x16
