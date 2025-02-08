@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Doll Assembler</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #upload {
+        position: absolute;
+        z-index: 10;
+        top: 10px;
+        left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" id="upload" accept=".json" />
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+    <script>
+      // Create PIXI application with resizeTo so the renderer is properly set up.
+      const app = new PIXI.Application({
+        resizeTo: window,
+        backgroundColor: 0x1099bb,
+      });
+      document.body.appendChild(app.view);
+
+      // Recursive function to process a part of the doll.
+      function createPart(partData) {
+        const container = new PIXI.Container();
+
+        if (partData.img) {
+          const sprite = PIXI.Sprite.from(partData.img);
+          sprite.anchor.set(0.5);
+          container.addChild(sprite);
+        }
+        
+        for (const key in partData) {
+          if (key === "img" || key === "cfg") continue;
+          const child = partData[key];
+          if (typeof child === "object") {
+            const childContainer = createPart(child);
+            container.addChild(childContainer);
+          }
+        }
+        return container;
+      }
+
+      // Function to build the doll from JSON data.
+      function buildDoll(data) {
+        app.stage.removeChildren();
+        for (const key in data) {
+          if (typeof data[key] === "object") {
+            const part = createPart(data[key]);
+            part.x = app.screen.width / 2;
+            part.y = app.screen.height / 2;
+            app.stage.addChild(part);
+          }
+        }
+      }
+
+      document.getElementById('upload').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const jsonData = JSON.parse(e.target.result);
+            buildDoll(jsonData);
+          } catch (err) {
+            console.error("Error parsing JSON:", err);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      /*
+      fetch('static/fallback.json')
+        .then(response => response.json())
+        .then(data => buildDoll(data))
+        .catch(error => console.error("Error loading fallback.json:", error));
+      */
+    </script>
+  </body>
+</html>
