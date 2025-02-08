@@ -1,0 +1,10 @@
+{
+  "bodyParts": {
+    "root": {
+      "sprite": "http://localhost:6969/static/assets/root/root1.sprite3"
+    },
+    "lshoulder": {
+      "sprite": "http://localhost:6969/static/assets/root/lshoulder/lshoulder1.sprite3"
+    }
+  }
+}

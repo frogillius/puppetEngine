@@ -1,2 +1,2 @@
 #!/bin/sh
-python -m http.server 6969 && xdg-open http://localhost:6969/test.html
+python enable-cors.py && xdg-open http://localhost:6969/static/test.html
