@@ -1,0 +1,14 @@
+{
+    log {
+    level warn
+    }
+}
+:6969 {
+    root * game
+    file_server
+
+    # PHP FastCGI configuration
+    php_fastcgi 127.0.0.1:9000
+
+    
+}
