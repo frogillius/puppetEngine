@@ -2,7 +2,6 @@
 #### Server
 [Caddy](https://github.com/caddyserver/caddy) <br>
 [PHP](https://github.com/php/php-src) <br>
-[B2ev](https://gitlab.com/TSnake41/b2ev)
 
 #### Client
 
