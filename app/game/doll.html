@@ -1,87 +1,102 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Doll Assembler</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixiJS JSON Loader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
     <style>
       body {
-        margin: 0;
-        overflow: hidden;
+          margin: 0;
+          overflow: hidden; /* Optional: Prevents scrolling */
       }
-      #upload {
-        position: absolute;
-        z-index: 10;
-        top: 10px;
-        left: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <input type="file" id="upload" accept=".json" />
-    <script src="https://pixijs.download/release/pixi.min.js"></script>
+  </style>
+  
+</head>
+<body>
     <script>
-      // Create PIXI application with resizeTo so the renderer is properly set up.
       const app = new PIXI.Application({
-        resizeTo: window,
-        backgroundColor: 0x1099bb,
-      });
-      document.body.appendChild(app.view);
-
-      // Recursive function to process a part of the doll.
-      function createPart(partData) {
-        const container = new PIXI.Container();
-
-        if (partData.img) {
-          const sprite = PIXI.Sprite.from(partData.img);
-          sprite.anchor.set(0.5);
-          container.addChild(sprite);
-        }
-        
-        for (const key in partData) {
-          if (key === "img" || key === "cfg") continue;
-          const child = partData[key];
-          if (typeof child === "object") {
-            const childContainer = createPart(child);
-            container.addChild(childContainer);
-          }
-        }
-        return container;
-      }
-
-      // Function to build the doll from JSON data.
-      function buildDoll(data) {
-        app.stage.removeChildren();
-        for (const key in data) {
-          if (typeof data[key] === "object") {
-            const part = createPart(data[key]);
-            part.x = app.screen.width / 2;
-            part.y = app.screen.height / 2;
-            app.stage.addChild(part);
-          }
-        }
-      }
-
-      document.getElementById('upload').addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const jsonData = JSON.parse(e.target.result);
-            buildDoll(jsonData);
-          } catch (err) {
-            console.error("Error parsing JSON:", err);
-          }
-        };
-        reader.readAsText(file);
-      });
-
-      /*
-      fetch('static/fallback.json')
+        width: window.innerWidth,
+        height: window.innerHeight,
+        backgroundColor: 0x1099bb
+    });
+    document.body.appendChild(app.view);
+    
+    // Create a container for the doll and center it
+    const dollContainer = new PIXI.Container();
+    app.stage.addChild(dollContainer);
+    
+    let zoomLevel = 3.0; // Starts at full size (1.0)
+    
+    // Function to center and scale the doll
+    function updateDollTransform() {
+        dollContainer.x = app.renderer.width / 2;
+        dollContainer.y = app.renderer.height / 2;
+        dollContainer.scale.set(zoomLevel);
+    }
+    
+    // Load the JSON file and add the doll
+    fetch('fallback.json')
         .then(response => response.json())
-        .then(data => buildDoll(data))
-        .catch(error => console.error("Error loading fallback.json:", error));
-      */
+        .then(data => {
+            loadPart(data.hips, dollContainer);
+            updateDollTransform(); // Center and apply zoom
+        })
+        .catch(error => console.error("Error loading JSON:", error));
+    
+    function loadPart(part, parentContainer, offsetX = 0, offsetY = 0) {
+        if (!part || !part.img) return;
+    
+        let container = new PIXI.Container();
+        parentContainer.addChild(container);
+    
+        let sprite = PIXI.Sprite.from(part.img);
+        container.addChild(sprite);
+    
+        let posX = offsetX;
+        let posY = offsetY;
+        let rotation = 0;
+    
+        // Load config if available
+        fetch(part.cfg)
+            .then(response => response.json())
+            .then(config => {
+                posX += config["offset-x"] || 0;
+                posY += config["offset-y"] || 0;
+                rotation = config.rotation || 0;
+    
+                sprite.x = posX;
+                sprite.y = posY;
+                sprite.rotation = rotation * (Math.PI / 180);
+            })
+            .catch(() => console.warn("Missing config, using defaults"));
+    
+        // Recursively load child parts
+        for (const key in part) {
+            if (typeof part[key] === 'object') {
+                loadPart(part[key], container, posX, posY);
+            }
+        }
+    }
+    
+    // Resize event to keep the doll centered and scaled
+    window.addEventListener("resize", () => {
+        app.renderer.resize(window.innerWidth, window.innerHeight);
+        updateDollTransform();
+    });
+    
+    // Function to set zoom level (0.0 to 1.0)
+    function setZoom(level) {
+        zoomLevel = Math.max(0.0, Math.min(1.0, level)); // Clamp between 0.0 and 1.0
+        updateDollTransform();
+    }
+    
+    // Example: Change zoom level with keyboard (Up/Down keys)
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowUp") setZoom(zoomLevel + 0.1); // Zoom in
+        if (event.key === "ArrowDown") setZoom(zoomLevel - 0.1); // Zoom out
+    });
+    
     </script>
-  </body>
+</body>
 </html>

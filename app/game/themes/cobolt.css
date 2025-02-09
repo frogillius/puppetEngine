@@ -45,7 +45,6 @@ html, body {
     display: flex;
     flex-direction: column;
     border-radius: 10px; /* Rounded corners */
-    padding: 10px; /* Add padding inside the stage area */
     box-sizing: border-box; /* Include padding in the element's total width and height */
 }
 #stageArea {
