@@ -1,0 +1,1 @@
+.\convert.exe /bat build/game.bat /exe game.exe
