@@ -10,6 +10,8 @@ html, body {
 #gameWindow {
     display: flex;
     height: 100%;
+    padding: 5px;
+    margin-bottom: 5px;
 }
 /* Each section styles */
 .section {
@@ -17,7 +19,6 @@ html, body {
     flex-direction: column;
     overflow: hidden;
     border-radius: 10px; /* Rounded corners */
-    padding: 5px; /* Add padding inside each section */
     box-sizing: border-box; /* Include padding in the element's total width and height */
 }
 /* Encounter and player areas: portrait on top, stats below */
@@ -27,7 +28,6 @@ html, body {
     text-align: center;
     border-radius: 10px; /* Rounded corners */
     color: #ffffff; /* White text */
-    margin-bottom: 5px
 }
 .stats {
     flex: 1;
@@ -36,7 +36,6 @@ html, body {
     border-radius: 10px; /* Rounded corners */
     background: #002244; /* Darker cobalt blue background */
     color: #ffffff; /* White text */
-    margin-top: 5px
 }
 /* Stage area layout: stage on top, dialog on bottom */
 #stage {
@@ -49,15 +48,12 @@ html, body {
     background: #004488; /* Cobalt blue background */
     overflow: hidden;
     border-radius: 10px; /* Rounded corners */
-    margin-bottom: 10px;
-    padding: 0px;
 }
 #dialog {
     background: #0055aa; /* Lighter cobalt blue background */
     padding: 10px;
     overflow: auto;
     border-radius: 10px; /* Rounded corners */
-    margin-top: 10px; /* Add margin to create space between stage and dialog */
     color: #ffffff; /* White text */
 }
 
@@ -73,7 +69,7 @@ html, body {
 }
 /* Styling for Split.js gutters */
 .gutter {
-    background-color: #002244; /* Cobalt blue background */
+    background-color: #011223; /* Cobalt blue background */
     background-repeat: no-repeat;
     background-position: 50%;
     border-radius: 10px; /* Rounded corners */
