@@ -1,67 +1,125 @@
 {
   "hips": {
     "img": "assets/hips/hips.png",
-    "cfg": "assets/hips/hips.json",
-    "left_leg": {
-      "img": "assets/left_leg/left_leg.png",
-      "cfg": "assets/left_leg/left_leg.json",
-      "calf": {
-        "img": "assets/calf/calf.png",
-        "cfg": "assets/calf/calf.json",
-        "feet": {
-          "img": "assets/feet/feet.png",
-          "cfg": "assets/feet/feet.json"
-        }
-      }
-    },
-    "right_leg": {
-      "img": "assets/right_leg/right_leg.png",
-      "cfg": "assets/right_leg/right_leg.json",
-      "calf": {
-        "img": "assets/calf/calf.png",
-        "cfg": "assets/calf/calf.json",
-        "feet": {
-          "img": "assets/feet/feet.png",
-          "cfg": "assets/feet/feet.json"
-        }
-      }
-    },
-    "midsection": {
-      "img": "assets/midsection/midsection.png",
-      "cfg": "assets/midsection/midsection.json",
-      "chest": {
-        "img": "assets/chest/chest.png",
-        "cfg": "assets/chest/chest.json",
-        "left_arm": {
-          "img": "assets/left_arm/left_arm.png",
-          "cfg": "assets/left_arm/left_arm.json",
-          "forearm": {
-            "img": "assets/forearm/forearm.png",
-            "cfg": "assets/forearm/forearm.json",
-            "hand": {
-              "img": "assets/hand/hand.png",
-              "cfg": "assets/hand/hand.json"
+    "rotation": 0,
+    "offset-x": 0,
+    "offset-y": 0,
+    "children": {
+      "left_leg": {
+        "img": "assets/left_leg/left_leg.png",
+        "rotation": 0,
+        "offset-x": 10,
+        "offset-y": 50,
+        "children": {
+          "calf": {
+            "img": "assets/calf/calf.png",
+            "rotation": 0,
+            "offset-x": 5,
+            "offset-y": 45,
+            "children": {
+              "feet": {
+                "img": "assets/feet/feet.png",
+                "rotation": 0,
+                "offset-x": 0,
+                "offset-y": 30
+              }
             }
           }
-        },
-        "right_arm": {
-          "img": "assets/right_arm/right_arm.png",
-          "cfg": "assets/right_arm/right_arm.json",
-          "forearm": {
-            "img": "assets/forearm/forearm.png",
-            "cfg": "assets/forearm/forearm.json",
-            "hand": {
-              "img": "assets/hand/hand.png",
-              "cfg": "assets/hand/hand.json"
+        }
+      },
+      "right_leg": {
+        "img": "assets/right_leg/right_leg.png",
+        "rotation": 0,
+        "offset-x": -10,
+        "offset-y": 50,
+        "children": {
+          "calf": {
+            "img": "assets/calf/calf.png",
+            "rotation": 0,
+            "offset-x": -5,
+            "offset-y": 45,
+            "children": {
+              "feet": {
+                "img": "assets/feet/feet.png",
+                "rotation": 0,
+                "offset-x": 0,
+                "offset-y": 30
+              }
             }
           }
-        },
-        "head": {
-          "img": "assets/head/head.png",
-          "cfg": "assets/head/head.json",
-          "neck": {
-            "img": "assets/neck/neck.png",
-            "cfg": "assets/neck/neck.json"
+        }
+      },
+      "midsection": {
+        "img": "assets/midsection/midsection.png",
+        "rotation": 0,
+        "offset-x": 0,
+        "offset-y": 70,
+        "children": {
+          "chest": {
+            "img": "assets/chest/chest.png",
+            "rotation": 0,
+            "offset-x": 0,
+            "offset-y": 40,
+            "children": {
+              "left_arm": {
+                "img": "assets/left_arm/left_arm.png",
+                "rotation": 0,
+                "offset-x": 25,
+                "offset-y": 0,
+                "children": {
+                  "forearm": {
+                    "img": "assets/forearm/forearm.png",
+                    "rotation": 0,
+                    "offset-x": 10,
+                    "offset-y": 40,
+                    "children": {
+                      "hand": {
+                        "img": "assets/hand/hand.png",
+                        "rotation": 0,
+                        "offset-x": 5,
+                        "offset-y": 30
+                      }
+                    }
+                  }
+                }
+              },
+              "right_arm": {
+                "img": "assets/right_arm/right_arm.png",
+                "rotation": 0,
+                "offset-x": -25,
+                "offset-y": 0,
+                "children": {
+                  "forearm": {
+                    "img": "assets/forearm/forearm.png",
+                    "rotation": 0,
+                    "offset-x": -10,
+                    "offset-y": 40,
+                    "children": {
+                      "hand": {
+                        "img": "assets/hand/hand.png",
+                        "rotation": 0,
+                        "offset-x": -5,
+                        "offset-y": 30
+                      }
+                    }
+                  }
+                }
+              },
+              "head": {
+                "img": "assets/head/head.png",
+                "rotation": 0,
+                "offset-x": 0,
+                "offset-y": 50,
+                "children": {
+                  "neck": {
+                    "img": "assets/neck/neck.png",
+                    "rotation": 0,
+                    "offset-x": 0,
+                    "offset-y": 10
+                  }
+                }
+              }
+            }
           }
         }
       }
