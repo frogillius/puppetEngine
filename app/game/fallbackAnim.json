@@ -1,0 +1,19 @@
+{
+    "skeleton": {
+      "pelvis": { "parent": null, "length": 0, "rotation": 0 },
+      "spine": { "parent": "pelvis", "length": 50, "rotation": 0 },
+      "head": { "parent": "spine", "length": 30, "rotation": 0 },
+      
+      "left_shoulder": { "parent": "spine", "length": 20, "rotation": 0 },
+      "left_elbow": { "parent": "left_shoulder", "length": 30, "rotation": 0 },
+      "left_hand": { 
+        "parent": "left_elbow", "length": 20, "rotation": 0,
+        "rotationSpline": [
+          { "time": 0.0, "angle": 0 },
+          { "time": 1.0, "angle": 1.5 }
+        ],
+        "x": 100, "y": 150
+      }
+    }
+  }
+  

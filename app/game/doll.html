@@ -1,102 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixiJS JSON Loader</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
-    <style>
-      body {
-          margin: 0;
-          overflow: hidden; /* Optional: Prevents scrolling */
-      }
+  <meta charset="utf-8">
+  <title>Centered, Scaled & Rotated Skeleton from Hierarchical JSON</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    /* The canvas fills its container */
+    #canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background-color: #f0f0f0;
+    }
   </style>
-  
 </head>
 <body>
-    <script>
-      const app = new PIXI.Application({
-        width: window.innerWidth,
-        height: window.innerHeight,
-        backgroundColor: 0x1099bb
-    });
-    document.body.appendChild(app.view);
-    
-    // Create a container for the doll and center it
-    const dollContainer = new PIXI.Container();
-    app.stage.addChild(dollContainer);
-    
-    let zoomLevel = 3.0; // Starts at full size (1.0)
-    
-    // Function to center and scale the doll
-    function updateDollTransform() {
-        dollContainer.x = app.renderer.width / 2;
-        dollContainer.y = app.renderer.height / 2;
-        dollContainer.scale.set(zoomLevel);
+  <canvas id="canvas"></canvas>
+  
+  <script>
+    class Bone {
+      constructor(name, parent = null, length = 0, rotation = 0, x = null, y = null) {
+        this.name = name;
+        this.parent = parent;
+        this.length = length;
+        this.rotation = rotation;
+        this.x = x; // Target x for IK
+        this.y = y; // Target y for IK
+        this.rotationSpline = []; // Rotation animation curve
+      }
     }
     
-    // Load the JSON file and add the doll
-    fetch('fallback.json')
-        .then(response => response.json())
-        .then(data => {
-            loadPart(data.hips, dollContainer);
-            updateDollTransform(); // Center and apply zoom
-        })
-        .catch(error => console.error("Error loading JSON:", error));
+    // Global storage for bones and root
+    let root = new Bone("root", null, 0, 0); // Root is fixed in place
+    let bones = {};
     
-    function loadPart(part, parentContainer, offsetX = 0, offsetY = 0) {
-        if (!part || !part.img) return;
+    // Catmull-Rom spline interpolation for smooth rotation
+    function catmullRomSpline(p0, p1, p2, p3, t) {
+      return 0.5 * (
+        (2 * p1) +
+        (-p0 + p2) * t +
+        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+        (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t
+      );
+    }
     
-        let container = new PIXI.Container();
-        parentContainer.addChild(container);
+    // Get interpolated rotation from spline
+    function interpolateRotation(spline, time) {
+      if (spline.length < 2) return spline[0].angle;
     
-        let sprite = PIXI.Sprite.from(part.img);
-        container.addChild(sprite);
+      for (let i = 0; i < spline.length - 1; i++) {
+        let p0 = spline[Math.max(i - 1, 0)].angle;
+        let p1 = spline[i].angle;
+        let p2 = spline[i + 1].angle;
+        let p3 = spline[Math.min(i + 2, spline.length - 1)].angle;
+        let t = (time - spline[i].time) / (spline[i + 1].time - spline[i].time);
     
-        let posX = offsetX;
-        let posY = offsetY;
-        let rotation = 0;
+        if (t >= 0 && t <= 1) return catmullRomSpline(p0, p1, p2, p3, t);
+      }
+      return spline[spline.length - 1].angle;
+    }
     
-        // Load config if available
-        fetch(part.cfg)
-            .then(response => response.json())
-            .then(config => {
-                posX += config["offset-x"] || 0;
-                posY += config["offset-y"] || 0;
-                rotation = config.rotation || 0;
+    // Get world position of a bone
+    function getBonePosition(bone) {
+      let x = 0, y = 0, angle = 0;
+      let current = bone;
     
-                sprite.x = posX;
-                sprite.y = posY;
-                sprite.rotation = rotation * (Math.PI / 180);
-            })
-            .catch(() => console.warn("Missing config, using defaults"));
+      while (current) {
+        angle += current.rotation;
+        x += Math.cos(angle) * current.length;
+        y += Math.sin(angle) * current.length;
+        current = current.parent;
+      }
+      return { x, y };
+    }
     
-        // Recursively load child parts
-        for (const key in part) {
-            if (typeof part[key] === 'object') {
-                loadPart(part[key], container, posX, posY);
-            }
+    // Get distance between two points
+    function distance(p1, p2) {
+      return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+    }
+    
+    // Inverse Kinematics (FABRIK-style)
+    function solveIK(chain, targetX, targetY) {
+      const maxIterations = 10;
+      const tolerance = 0.1;
+    
+      for (let i = 0; i < maxIterations; i++) {
+        let endEffector = getBonePosition(chain[chain.length - 1]);
+    
+        if (distance(endEffector, { x: targetX, y: targetY }) < tolerance) break;
+    
+        for (let j = chain.length - 2; j >= 0; j--) {
+          let bone = chain[j];
+          let end = getBonePosition(chain[chain.length - 1]);
+    
+          let delta = Math.atan2(targetY - bone.y, targetX - bone.x);
+          let boneAngle = Math.atan2(end.y - bone.y, end.x - bone.x);
+          let rotationChange = delta - boneAngle;
+    
+          bone.rotation += rotationChange;
         }
+      }
     }
     
-    // Resize event to keep the doll centered and scaled
-    window.addEventListener("resize", () => {
-        app.renderer.resize(window.innerWidth, window.innerHeight);
-        updateDollTransform();
-    });
+    // Parse animation JSON
+    function parseAnimation(jsonData) {
+      bones = {}; // Reset bones map
     
-    // Function to set zoom level (0.0 to 1.0)
-    function setZoom(level) {
-        zoomLevel = Math.max(0.0, Math.min(50.0, level)); // Clamp between 0.0 and 50.0
-        updateDollTransform();
+      for (let name in jsonData.skeleton) {
+        let data = jsonData.skeleton[name];
+        let parent = data.parent ? bones[data.parent] : root;
+        bones[name] = new Bone(name, parent, data.length, data.rotation, data.x, data.y);
+        if (data.rotationSpline) bones[name].rotationSpline = data.rotationSpline;
+      }
     }
     
-    // Example: Change zoom level with keyboard (Up/Down keys)
-    window.addEventListener("keydown", (event) => {
-        if (event.key === "ArrowUp") setZoom(zoomLevel + 0.1); // Zoom in
-        if (event.key === "ArrowDown") setZoom(zoomLevel - 0.1); // Zoom out
-    });
+    // Main animation loop
+    function animationLoop(time) {
+      for (let name in bones) {
+        let bone = bones[name];
     
-    </script>
+        if (bone.rotationSpline.length > 0) {
+          bone.rotation = interpolateRotation(bone.rotationSpline, time);
+        }
+      }
+    
+      for (let name in bones) {
+        let bone = bones[name];
+        if (bone.x !== null && bone.y !== null) {
+          let chain = [];
+          let current = bone;
+    
+          while (current && current !== root) {
+            chain.push(current);
+            current = current.parent;
+          }
+    
+          solveIK(chain.reverse(), bone.x, bone.y);
+        }
+      }
+    
+      renderSkeleton();
+      requestAnimationFrame(animationLoop);
+    }
+    
+    // Render function (simplified, assumes a canvas exists)
+    function renderSkeleton() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#fff";
+    
+      for (let name in bones) {
+        let bone = bones[name];
+        if (bone.parent) {
+          let start = getBonePosition(bone.parent);
+          let end = getBonePosition(bone);
+    
+          if (isNaN(start.x) || isNaN(start.y) || isNaN(end.x) || isNaN(end.y)) {
+            console.error(`Bone ${name} has invalid position!`, { start, end });
+            continue; // Skip drawing broken bones
+          }
+    
+          ctx.beginPath();
+          ctx.moveTo(start.x + canvas.width / 2, start.y + canvas.height / 2);
+          ctx.lineTo(end.x + canvas.width / 2, end.y + canvas.height / 2);
+          ctx.stroke();
+        }
+      }
+    }
+    
+    
+    // Initialize canvas
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // Load animation from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const animationURL = urlParams.get("animation");
+    
+    fetch(animationURL)
+      .then(response => response.json())
+      .then(json => {
+        parseAnimation(json);
+        requestAnimationFrame(animationLoop);
+      });
+    
+  </script>
 </body>
 </html>

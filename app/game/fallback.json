@@ -1,128 +1,93 @@
 {
-  "hips": {
-    "img": "assets/hips/hips.png",
-    "rotation": 0,
-    "offset-x": 0,
-    "offset-y": 0,
-    "children": {
-      "left_leg": {
-        "img": "assets/left_leg/left_leg.png",
-        "rotation": 0,
-        "offset-x": 10,
-        "offset-y": 50,
-        "children": {
-          "calf": {
-            "img": "assets/calf/calf.png",
-            "rotation": 0,
-            "offset-x": 5,
-            "offset-y": 45,
-            "children": {
-              "feet": {
-                "img": "assets/feet/feet.png",
-                "rotation": 0,
-                "offset-x": 0,
-                "offset-y": 30
-              }
-            }
-          }
-        }
-      },
-      "right_leg": {
-        "img": "assets/right_leg/right_leg.png",
-        "rotation": 0,
-        "offset-x": -10,
-        "offset-y": 50,
-        "children": {
-          "calf": {
-            "img": "assets/calf/calf.png",
-            "rotation": 0,
-            "offset-x": -5,
-            "offset-y": 45,
-            "children": {
-              "feet": {
-                "img": "assets/feet/feet.png",
-                "rotation": 0,
-                "offset-x": 0,
-                "offset-y": 30
-              }
-            }
-          }
-        }
-      },
-      "midsection": {
-        "img": "assets/midsection/midsection.png",
-        "rotation": 0,
-        "offset-x": 0,
-        "offset-y": 70,
-        "children": {
-          "chest": {
-            "img": "assets/chest/chest.png",
-            "rotation": 0,
-            "offset-x": 0,
-            "offset-y": 40,
-            "children": {
-              "left_arm": {
-                "img": "assets/left_arm/left_arm.png",
-                "rotation": 0,
-                "offset-x": 25,
-                "offset-y": 0,
-                "children": {
-                  "forearm": {
-                    "img": "assets/forearm/forearm.png",
-                    "rotation": 0,
-                    "offset-x": 10,
-                    "offset-y": 40,
-                    "children": {
-                      "hand": {
-                        "img": "assets/hand/hand.png",
-                        "rotation": 0,
-                        "offset-x": 5,
-                        "offset-y": 30
-                      }
-                    }
-                  }
+  "name": "root",
+  "x": 300,
+  "y": 500,
+  "rotation": 0,
+  "children": [
+    {
+      "name": "pelvis",
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "children": [
+        {
+          "name": "spine",
+          "x": 0,
+          "y": -120,
+          "rotation": 0,
+          "children": [
+            { "name": "head", "x": 0, "y": -40, "rotation": 0 },
+            {
+              "name": "left_shoulder",
+              "x": -40,
+              "y": -10,
+              "rotation": 0,
+              "children": [
+                {
+                  "name": "left_elbow",
+                  "x": -40,
+                  "y": 40,
+                  "rotation": 0,
+                  "children": [
+                    { "name": "left_hand", "x": -30, "y": 30, "rotation": 0 }
+                  ]
                 }
-              },
-              "right_arm": {
-                "img": "assets/right_arm/right_arm.png",
-                "rotation": 0,
-                "offset-x": -25,
-                "offset-y": 0,
-                "children": {
-                  "forearm": {
-                    "img": "assets/forearm/forearm.png",
-                    "rotation": 0,
-                    "offset-x": -10,
-                    "offset-y": 40,
-                    "children": {
-                      "hand": {
-                        "img": "assets/hand/hand.png",
-                        "rotation": 0,
-                        "offset-x": -5,
-                        "offset-y": 30
-                      }
-                    }
-                  }
+              ]
+            },
+            {
+              "name": "right_shoulder",
+              "x": 40,
+              "y": -10,
+              "rotation": 0,
+              "children": [
+                {
+                  "name": "right_elbow",
+                  "x": 40,
+                  "y": 40,
+                  "rotation": 0,
+                  "children": [
+                    { "name": "right_hand", "x": 30, "y": 30, "rotation": 0 }
+                  ]
                 }
-              },
-              "head": {
-                "img": "assets/head/head.png",
-                "rotation": 0,
-                "offset-x": 0,
-                "offset-y": 50,
-                "children": {
-                  "neck": {
-                    "img": "assets/neck/neck.png",
-                    "rotation": 0,
-                    "offset-x": 0,
-                    "offset-y": 10
-                  }
-                }
-              }
+              ]
             }
-          }
+          ]
+        },
+        {
+          "name": "left_hip",
+          "x": -20,
+          "y": 40,
+          "rotation": 56,
+          "children": [
+            {
+              "name": "left_knee",
+              "x": 0,
+              "y": 80,
+              "rotation": 0,
+              "children": [
+                { "name": "left_foot", "x": 0, "y": 80, "rotation": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "right_hip",
+          "x": 20,
+          "y": 40,
+          "rotation": 0,
+          "children": [
+            {
+              "name": "right_knee",
+              "x": 0,
+              "y": 80,
+              "rotation": 0,
+              "children": [
+                { "name": "right_foot", "x": 0, "y": 80, "rotation": 0 }
+              ]
+            }
+          ]
         }
-      }
+      ]
     }
-  }
+  ]
 }
