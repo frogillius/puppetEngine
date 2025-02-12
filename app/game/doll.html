@@ -36,7 +36,7 @@
     
     // Global storage for bones and root
     let root = new Bone("root", null, 0, 0); // Root is fixed in place
-    let bones = {};
+    let bones = { root: root };
     
     // Catmull-Rom spline interpolation for smooth rotation
     function catmullRomSpline(p0, p1, p2, p3, t) {
@@ -48,8 +48,70 @@
       );
     }
     
+    // Initialize the skeleton based on JSON data with error handling
+    function skeletonInit(jsonData) {
+      // Initialize bones map if it doesn't exist
+      if (!bones) {
+        bones = { root: root };
+      }
+
+      // Function to recursively process bone data and create/update bones
+      function processBone(boneData, parent) {
+        try {
+          // Validate boneData properties
+          if (!boneData || typeof boneData !== 'object') {
+            throw new Error(`Invalid bone data for ${parent ? parent.name : 'root'}`);
+          }
+
+          let name = boneData.name;
+          if (typeof name !== 'string' || !name.trim()) {
+            throw new Error(`Bone must have a valid 'name'. Invalid name for bone data: ${JSON.stringify(boneData)}`);
+          }
+
+          if (bones[name]) {
+            // Update the existing bone's properties
+            bones[name].parent = parent;
+            bones[name].x = boneData.x ?? 0;  // Default to 0 if x is missing
+            bones[name].y = boneData.y ?? 0;  // Default to 0 if y is missing
+            bones[name].rotation = boneData.rotation ?? 0;  // Default to 0 if rotation is missing
+          } else {
+            // Create a new bone if it doesn't exist
+            bones[name] = new Bone(name, parent, boneData.x ?? 0, boneData.y ?? 0, boneData.rotation ?? 0);
+          }
+
+          // Recursively process child bones if they exist
+          if (boneData.children) {
+            if (!Array.isArray(boneData.children)) {
+              throw new Error(`'children' should be an array for bone: ${name}`);
+            }
+            boneData.children.forEach(childBone => processBone(childBone, bones[name]));
+            }
+        } catch (error) {
+          console.error(`Error processing bone ${boneData.name || 'unknown'}: ${error.message}`);
+        }
+      }
+
+      try {
+        // Validate jsonData structure
+        if (!jsonData || typeof jsonData !== 'object' || !jsonData.name) {
+          throw new Error('Invalid or missing root bone data in JSON.');
+        }
+
+      // Start processing from the root
+      processBone(jsonData, root);
+      } catch (error) {
+      console.error(`Error initializing skeleton: ${error.message}`);
+      }
+    
+
+
+      // Start processing from the root
+      processBone(jsonData, root);
+    }
+
     // Get interpolated rotation from spline
     function interpolateRotation(spline, time) {
+      if (spline.length === 0) return 0; // Default rotation if spline is empty
       if (spline.length < 2) return spline[0].angle;
     
       for (let i = 0; i < spline.length - 1; i++) {
@@ -101,25 +163,53 @@
           let boneAngle = Math.atan2(end.y - bone.y, end.x - bone.x);
           let rotationChange = delta - boneAngle;
     
-          bone.rotation += rotationChange;
+          if (!isNaN(rotationChange)) {
+            bone.rotation += rotationChange;
+          } else {
+            console.error('Invalid rotation change detected in IK solver.');
+            break;
+          }
         }
       }
     }
     
     // Parse animation JSON
     function parseAnimation(jsonData) {
-      bones = {}; // Reset bones map
-    
-      for (let name in jsonData.skeleton) {
-        let data = jsonData.skeleton[name];
-        let parent = data.parent ? bones[data.parent] : root;
-        bones[name] = new Bone(name, parent, data.length, data.rotation, data.x, data.y);
-        if (data.rotationSpline) bones[name].rotationSpline = data.rotationSpline;
+      // Initialize bones map if it doesn't exist
+      if (!bones) {
+          bones = { root: root };
       }
-    }
+  
+      for (let name in jsonData.skeleton) {
+          console.log(name);
+          let data = jsonData.skeleton[name];
+          let parent = data.parent ? bones[data.parent] : root;
+  
+          // Check if the bone already exists
+          if (bones[name]) {
+              // Update the existing bone's properties
+              bones[name].parent = parent;
+              bones[name].length = data.length;
+              bones[name].rotation = data.rotation;
+              bones[name].x = data.x;
+              bones[name].y = data.y;
+              if (data.rotationSpline) bones[name].rotationSpline = data.rotationSpline;
+          } else {
+              // Create a new bone if it doesn't exist
+              bones[name] = new Bone(name, parent, data.length, data.rotation, data.x, data.y);
+              if (data.rotationSpline) bones[name].rotationSpline = data.rotationSpline;
+          }
+      }
+  }
+  
     
     // Main animation loop
     function animationLoop(time) {
+      if (isNaN(time)) {
+        console.error('Invalid time value in animation loop.');
+        return;
+      }
+    
       for (let name in bones) {
         let bone = bones[name];
     
@@ -146,11 +236,19 @@
       renderSkeleton();
       requestAnimationFrame(animationLoop);
     }
+
     
-    // Render function (simplified, assumes a canvas exists)
+    
+    // Render function
     function renderSkeleton() {
+      if (!ctx) {
+        console.error('Canvas context is not available.');
+        return;
+      }
+    
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = "#fff";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
     
       for (let name in bones) {
         let bone = bones[name];
@@ -170,6 +268,7 @@
         }
       }
     }
+
     
     
     // Initialize canvas
@@ -178,16 +277,48 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
+    // auto resize
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
     // Load animation from URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     const animationURL = urlParams.get("animation");
+    const configURL = urlParams.get("bonesUrl");
     
-    fetch(animationURL)
-      .then(response => response.json())
-      .then(json => {
-        parseAnimation(json);
-        requestAnimationFrame(animationLoop);
-      });
+    // Something is stuck in a loop. Replace this with the animation logic for bone creation.
+    /* 
+    if (configURL) {
+      fetch(configURL)
+        .then(response => response.json())
+        .then(json => {
+          console.log(json);
+          skeletonInit(json);
+          requestAnimationFrame(animationLoop);
+        })
+        .catch(error => {
+          console.error('Error loading config:', error);
+        });
+    } else {
+      console.error('No config URL provided.');
+    }
+    */
+    if (animationURL) {
+      fetch(animationURL)
+        .then(response => response.json())
+        .then(json => {
+          console.log(json);
+          parseAnimation(json);
+          requestAnimationFrame(animationLoop);
+        })
+        .catch(error => {
+          console.error('Error loading animation:', error);
+        });
+    } else {
+      console.error('No animation URL provided.');
+    }
     
   </script>
 </body>
