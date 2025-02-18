@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>silly bean simulator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+    }
+    #controls, #instructionUI, #imageControls {
+      margin-top: 20px;
+    }
+    #canvas-container {
+      margin: 20px auto;
+      display: block;
+      border: 1px solid #000;
+      background: #fff;
+      width: 600px;
+      height: 600px;
+    }
+    label, button {
+      margin: 5px;
+    }
+    .sliderContainer {
+      margin: 10px 0;
+    }
+    input[type="text"] {
+      width: 100px;
+      text-align: center;
+    }
+	  #softNodeIndices {
+	    background-color: #10ff15;
+	  }
+  </style>
+</head>
+<body>
+  <h1>silly bean simulator</h1>
+  
+  <div id="controls">
+    <label>
+      <input type="checkbox" id="gravityToggle" checked> Enable Gravity
+    </label>
+  </div>
+  
+  <!-- UI for instructing target positions -->
+  <div id="instructionUI">
+    <h2>Target Nodes</h2>
+    <div>
+      <!-- Updated node order with a new torso node:
+           0: Torso Top (T1)
+           1: Torso Middle (T2)
+           2: Torso Bottom (T3)
+           3: Head (H)
+           4: Left Arm Upper (LA1)
+           5: Left Arm Lower (LA2)
+           6: Right Arm Upper (RA1)
+           7: Right Arm Lower (RA2)
+           8: Left Leg Upper (LL1)
+           9: Left Leg Lower (LL2)
+           10: Right Leg Upper (RL1)
+           11: Right Leg Lower (RL2)
+           12: Left Hand (LH)
+           13: Right Hand (RH)
+           14: Left Foot (LF)
+           15: Right Foot (RF)
+      -->
+      <label><input type="checkbox" value="0" class="target-checkbox"> Torso Top (T1)</label>
+      <label><input type="checkbox" value="1" class="target-checkbox"> Torso Middle (T2)</label>
+      <label><input type="checkbox" value="2" class="target-checkbox"> Torso Bottom (T3)</label>
+      <label><input type="checkbox" value="3" class="target-checkbox"> Head (H)</label>
+      <label><input type="checkbox" value="4" class="target-checkbox"> Left Arm Upper (LA1)</label>
+      <label><input type="checkbox" value="5" class="target-checkbox"> Left Arm Lower (LA2)</label>
+      <label><input type="checkbox" value="6" class="target-checkbox"> Right Arm Upper (RA1)</label>
+      <label><input type="checkbox" value="7" class="target-checkbox"> Right Arm Lower (RA2)</label>
+      <label><input type="checkbox" value="8" class="target-checkbox"> Left Leg Upper (LL1)</label>
+      <label><input type="checkbox" value="9" class="target-checkbox"> Left Leg Lower (LL2)</label>
+      <label><input type="checkbox" value="10" class="target-checkbox"> Right Leg Upper (RL1)</label>
+      <label><input type="checkbox" value="11" class="target-checkbox"> Right Leg Lower (RL2)</label>
+      <label><input type="checkbox" value="12" class="target-checkbox"> Left Hand (LH)</label>
+      <label><input type="checkbox" value="13" class="target-checkbox"> Right Hand (RH)</label>
+      <label><input type="checkbox" value="14" class="target-checkbox"> Left Foot (LF)</label>
+      <label><input type="checkbox" value="15" class="target-checkbox"> Right Foot (RF)</label>
+    </div>
+    <div class="sliderContainer">
+      <label>
+        Target X: <input type="range" id="targetX" min="0" max="600" value="300">
+        <span id="targetXVal">300</span>
+      </label>
+    </div>
+    <div class="sliderContainer">
+      <label>
+        Target Y: <input type="range" id="targetY" min="0" max="600" value="300">
+        <span id="targetYVal">300</span>
+      </label>
+    </div>
+    <button id="setTargetButton">Set Target</button>
+    <button id="clearTargetsButton">Clear Targets</button>
+  </div>
+
+  <!-- UI for image attachments -->
+  <div id="imageControls">
+    <h2>Image Attachments</h2>
+    <p>
+      You can attach an image via URL and specify which nodes control it.
+      In <strong>hard</strong> mode the image sticks to a single bone.
+      In <strong>deform</strong> mode the image is mapped with an affine transform using three nodes.
+      In <strong>soft</strong> mode the image is subdivided into a mesh and deformed based on a quadratic–curve.
+    </p>
+    <div>
+      <button id="addHardImage">Add Hard Image to Head</button>
+    </div>
+    <div>
+      <button id="addDeformImage">Add Deform Image</button>
+      <label>Node indices (comma-separated): 
+        <input type="text" id="deformNodeIndices" value="4,5,12">
+      </label>
+    </div>
+    <div>
+      <button id="addSoftImage">Add Soft Image</button>
+      <label>Node indices (comma-separated): 
+        <input type="text" id="softNodeIndices" value="0,4,5">
+      </label>
+    </div>
+    <div>
+      <button id="toggleImageModeButton">Toggle Image Mode (for all attachments)</button>
+    </div>
+  </div>
+  
+  <div id="canvas-container"></div>
+  
+  <!-- Matter.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script>
+    // Module aliases.
+    const Engine = Matter.Engine,
+          Render = Matter.Render,
+          Runner = Matter.Runner,
+          World = Matter.World,
+          Bodies = Matter.Bodies,
+          Constraint = Matter.Constraint,
+          Events = Matter.Events,
+          Vector = Matter.Vector,
+          Body = Matter.Body;
+    
+    // Create engine.
+    const engine = Engine.create();
+    engine.world.gravity.y = 1; // default gravity
+    
+    // Create renderer.
+    const render = Render.create({
+      element: document.getElementById('canvas-container'),
+      engine: engine,
+      options: {
+        width: 600,
+        height: 600,
+        wireframes: false,
+        background: '#fff'
+      }
+    });
+    Render.run(render);
+    
+    // Create runner.
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+    
+    // --- Constants for Joint Limit Enforcement ---
+    const K_HARD = 0.005;
+    const K_SOFT = 0.0025;
+    
+    // --- Build the Humanoid Skeleton (Side View) ---
+    // Define collision categories.
+    const HEAD_CATEGORY = 0x0002;
+    const TORSO_CATEGORY = 0x0004;
+    const LEFT_ARM_CATEGORY = 0x0008;
+    const RIGHT_ARM_CATEGORY = 0x0010;
+    const LEFT_LEG_CATEGORY = 0x0020;
+    const RIGHT_LEG_CATEGORY = 0x0040;
+    
+    // Create bodies for each section.
+    // Torso (3 nodes):
+    const torsoTop = Bodies.circle(300, 200, 10, {
+      collisionFilter: { category: TORSO_CATEGORY, mask: TORSO_CATEGORY },
+      render: { fillStyle: 'blue' }
+    });
+    const torsoMiddle = Bodies.circle(300, 225, 10, {
+      collisionFilter: { category: TORSO_CATEGORY, mask: TORSO_CATEGORY },
+      render: { fillStyle: 'blue' }
+    });
+    const torsoBottom = Bodies.circle(300, 250, 10, {
+      collisionFilter: { category: TORSO_CATEGORY, mask: TORSO_CATEGORY },
+      render: { fillStyle: 'blue' }
+    });
+    
+    // Head (1 node):
+    const head = Bodies.circle(330, 180, 10, {
+      collisionFilter: { category: HEAD_CATEGORY, mask: HEAD_CATEGORY },
+      render: { fillStyle: 'red' }
+    });
+    
+    // Left Arm (2 nodes):
+    const leftArmUpper = Bodies.circle(280, 200, 10, {
+      collisionFilter: { category: LEFT_ARM_CATEGORY, mask: LEFT_ARM_CATEGORY },
+      render: { fillStyle: 'orange' }
+    });
+    const leftArmLower = Bodies.circle(250, 210, 10, {
+      collisionFilter: { category: LEFT_ARM_CATEGORY, mask: LEFT_ARM_CATEGORY },
+      render: { fillStyle: 'orange' }
+    });
+    
+    // Right Arm (2 nodes):
+    const rightArmUpper = Bodies.circle(310, 200, 10, {
+      collisionFilter: { category: RIGHT_ARM_CATEGORY, mask: RIGHT_ARM_CATEGORY },
+      render: { fillStyle: 'green' }
+    });
+    const rightArmLower = Bodies.circle(320, 230, 10, {
+      collisionFilter: { category: RIGHT_ARM_CATEGORY, mask: RIGHT_ARM_CATEGORY },
+      render: { fillStyle: 'green' }
+    });
+    
+    // Left Leg (2 nodes):
+    const leftLegUpper = Bodies.circle(295, 300, 10, {
+      collisionFilter: { category: LEFT_LEG_CATEGORY, mask: LEFT_LEG_CATEGORY },
+      render: { fillStyle: 'purple' }
+    });
+    const leftLegLower = Bodies.circle(295, 350, 10, {
+      collisionFilter: { category: LEFT_LEG_CATEGORY, mask: LEFT_LEG_CATEGORY },
+      render: { fillStyle: 'purple' }
+    });
+    
+    // Right Leg (2 nodes):
+    const rightLegUpper = Bodies.circle(305, 300, 10, {
+      collisionFilter: { category: RIGHT_LEG_CATEGORY, mask: RIGHT_LEG_CATEGORY },
+      render: { fillStyle: 'brown' }
+    });
+    const rightLegLower = Bodies.circle(305, 350, 10, {
+      collisionFilter: { category: RIGHT_LEG_CATEGORY, mask: RIGHT_LEG_CATEGORY },
+      render: { fillStyle: 'brown' }
+    });
+    
+    // New Nodes: Hands and Feet (smaller circles)
+    const leftHand = Bodies.circle(230, 210, 6, {
+      collisionFilter: { category: LEFT_ARM_CATEGORY, mask: LEFT_ARM_CATEGORY },
+      render: { fillStyle: 'orange' }
+    });
+    const rightHand = Bodies.circle(340, 230, 6, {
+      collisionFilter: { category: RIGHT_ARM_CATEGORY, mask: RIGHT_ARM_CATEGORY },
+      render: { fillStyle: 'green' }
+    });
+    const leftFoot = Bodies.circle(295, 370, 6, {
+      collisionFilter: { category: LEFT_LEG_CATEGORY, mask: LEFT_LEG_CATEGORY },
+      render: { fillStyle: 'purple' }
+    });
+    const rightFoot = Bodies.circle(305, 370, 6, {
+      collisionFilter: { category: RIGHT_LEG_CATEGORY, mask: RIGHT_LEG_CATEGORY },
+      render: { fillStyle: 'brown' }
+    });
+    
+    // Store all nodes (order matters for the targeting UI):
+    const nodes = [
+      torsoTop,     // 0
+      torsoMiddle,  // 1
+      torsoBottom,  // 2
+      head,         // 3
+      leftArmUpper, // 4
+      leftArmLower, // 5
+      rightArmUpper,// 6
+      rightArmLower,// 7
+      leftLegUpper, // 8
+      leftLegLower, // 9
+      rightLegUpper,// 10
+      rightLegLower,// 11
+      leftHand,     // 12
+      rightHand,    // 13
+      leftFoot,     // 14
+      rightFoot     // 15
+    ];
+    
+    // --- Define a hierarchy for node orientation ---
+    // Each entry: { parent: parentIndex, children: [childIndices] }
+    // (Root is node 0; its “designated” child for orientation is node 1.)
+    const hierarchy = {
+      0: { parent: null, children: [1, 3, 4, 6] },
+      1: { parent: 0, children: [2] },
+      2: { parent: 1, children: [8, 10] },
+      3: { parent: 0, children: [] },
+      4: { parent: 0, children: [5] },
+      5: { parent: 4, children: [12] },
+      6: { parent: 0, children: [7] },
+      7: { parent: 6, children: [13] },
+      8: { parent: 2, children: [9] },
+      9: { parent: 8, children: [14] },
+      10: { parent: 2, children: [11] },
+      11: { parent: 10, children: [15] },
+      12: { parent: 5, children: [] },
+      13: { parent: 7, children: [] },
+      14: { parent: 9, children: [] },
+      15: { parent: 11, children: [] }
+    };
+    
+    // --- Create constraints connecting the nodes. ---
+    const constraints = [];
+    
+    function setJointLimits(constraint, jointType, deviationRange) {
+      const dx = constraint.bodyB.position.x - constraint.bodyA.position.x;
+      const dy = constraint.bodyB.position.y - constraint.bodyA.position.y;
+      constraint.defaultAngle = Math.atan2(dy, dx);
+      constraint.minAngle = constraint.defaultAngle - deviationRange;
+      constraint.maxAngle = constraint.defaultAngle + deviationRange;
+      constraint.jointType = jointType;
+    }
+    
+    // Torso Constraints:
+    const upperTorsoConstraint = Constraint.create({
+      bodyA: torsoTop,
+      bodyB: torsoMiddle,
+      length: 25,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(upperTorsoConstraint, 'soft', 0.35);
+    constraints.push(upperTorsoConstraint);
+    
+    const lowerTorsoConstraint = Constraint.create({
+      bodyA: torsoMiddle,
+      bodyB: torsoBottom,
+      length: 25,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(lowerTorsoConstraint, 'soft', 0.35);
+    constraints.push(lowerTorsoConstraint);
+    
+    // Neck.
+    const neckConstraint = Constraint.create({
+      bodyA: torsoTop,
+      bodyB: head,
+      length: 50,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(neckConstraint, 'soft', 0.52);
+    constraints.push(neckConstraint);
+    
+    // Left Arm.
+    const leftShoulder = Constraint.create({
+      bodyA: torsoTop,
+      bodyB: leftArmUpper,
+      length: 40,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(leftShoulder, 'soft', 0.785);
+    constraints.push(leftShoulder);
+    
+    const leftElbow = Constraint.create({
+      bodyA: leftArmUpper,
+      bodyB: leftArmLower,
+      length: 40,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(leftElbow, 'hard', 0.52);
+    constraints.push(leftElbow);
+    
+    // Right Arm.
+    const rightShoulder = Constraint.create({
+      bodyA: torsoTop,
+      bodyB: rightArmUpper,
+      length: 40,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(rightShoulder, 'soft', 0.785);
+    constraints.push(rightShoulder);
+    
+    const rightElbow = Constraint.create({
+      bodyA: rightArmUpper,
+      bodyB: rightArmLower,
+      length: 40,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(rightElbow, 'hard', 0.52);
+    constraints.push(rightElbow);
+    
+    // Left Leg.
+    const leftHip = Constraint.create({
+      bodyA: torsoBottom,
+      bodyB: leftLegUpper,
+      length: 50,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(leftHip, 'soft', 0.785);
+    constraints.push(leftHip);
+    
+    const leftKnee = Constraint.create({
+      bodyA: leftLegUpper,
+      bodyB: leftLegLower,
+      length: 50,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(leftKnee, 'hard', 0.52);
+    constraints.push(leftKnee);
+    
+    // Right Leg.
+    const rightHip = Constraint.create({
+      bodyA: torsoBottom,
+      bodyB: rightLegUpper,
+      length: 50,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(rightHip, 'soft', 0.785);
+    constraints.push(rightHip);
+    
+    const rightKnee = Constraint.create({
+      bodyA: rightLegUpper,
+      bodyB: rightLegLower,
+      length: 50,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(rightKnee, 'hard', 0.52);
+    constraints.push(rightKnee);
+    
+    // Constraints for hands and feet.
+    const leftHandConstraint = Constraint.create({
+      bodyA: leftArmLower,
+      bodyB: leftHand,
+      length: 20,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(leftHandConstraint, 'hard', 0.35);
+    constraints.push(leftHandConstraint);
+    
+    const rightHandConstraint = Constraint.create({
+      bodyA: rightArmLower,
+      bodyB: rightHand,
+      length: 20,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(rightHandConstraint, 'hard', 0.35);
+    constraints.push(rightHandConstraint);
+    
+    const leftFootConstraint = Constraint.create({
+      bodyA: leftLegLower,
+      bodyB: leftFoot,
+      length: 20,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(leftFootConstraint, 'hard', 0.35);
+    constraints.push(leftFootConstraint);
+    
+    const rightFootConstraint = Constraint.create({
+      bodyA: rightLegLower,
+      bodyB: rightFoot,
+      length: 20,
+      stiffness: 1,
+      render: { strokeStyle: '#555', lineWidth: 3 }
+    });
+    setJointLimits(rightFootConstraint, 'hard', 0.35);
+    constraints.push(rightFootConstraint);
+    
+    // Add nodes and constraints to the world.
+    World.add(engine.world, nodes);
+    World.add(engine.world, constraints);
+    
+    // --- Gravity Toggle ---
+    const gravityToggle = document.getElementById('gravityToggle');
+    gravityToggle.addEventListener('change', function() {
+      engine.world.gravity.y = gravityToggle.checked ? 1 : 0;
+    });
+    
+    // --- Boundaries ---
+    const ALL_CATEGORIES = HEAD_CATEGORY | TORSO_CATEGORY | LEFT_ARM_CATEGORY | RIGHT_ARM_CATEGORY | LEFT_LEG_CATEGORY | RIGHT_LEG_CATEGORY;
+    const boundaries = [
+      Bodies.rectangle(300, 590, 600, 20, { 
+        isStatic: true,
+        collisionFilter: { category: ALL_CATEGORIES, mask: ALL_CATEGORIES },
+        render: { fillStyle: '#6c757d' }
+      }),
+      Bodies.rectangle(300, 10, 600, 20, { 
+        isStatic: true,
+        collisionFilter: { category: ALL_CATEGORIES, mask: ALL_CATEGORIES },
+        render: { fillStyle: '#cccccc' }
+      }),
+      Bodies.rectangle(10, 300, 20, 600, { 
+        isStatic: true,
+        collisionFilter: { category: ALL_CATEGORIES, mask: ALL_CATEGORIES },
+        render: { fillStyle: '#cccccc' }
+      }),
+      Bodies.rectangle(590, 300, 20, 600, { 
+        isStatic: true,
+        collisionFilter: { category: ALL_CATEGORIES, mask: ALL_CATEGORIES },
+        render: { fillStyle: '#cccccc' }
+      })
+    ];
+    World.add(engine.world, boundaries);
+    
+    // --- Force-Driven Dragging (Mouse) ---
+    let draggedBody = null;
+    let dragTarget = null;
+    
+    function getMousePos(event) {
+      const rect = render.canvas.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+    
+    render.canvas.addEventListener('mousedown', function(event) {
+      const mousePos = getMousePos(event);
+      const bodies = Matter.Composite.allBodies(engine.world);
+      const found = Matter.Query.point(bodies, mousePos);
+      if (found.length > 0) {
+        draggedBody = found[0];
+        dragTarget = Vector.clone(mousePos);
+      }
+    });
+    
+    render.canvas.addEventListener('mousemove', function(event) {
+      if (draggedBody) { dragTarget = getMousePos(event); }
+    });
+    render.canvas.addEventListener('mouseup', function() { draggedBody = null; dragTarget = null; });
+    render.canvas.addEventListener('mouseleave', function() { draggedBody = null; dragTarget = null; });
+    
+    // --- Multi-Node Targeting ---
+    let targetInstructions = { "3": { x: 300, y: 300 } };
+    
+    const targetXSlider = document.getElementById('targetX');
+    const targetYSlider = document.getElementById('targetY');
+    const targetXVal = document.getElementById('targetXVal');
+    const targetYVal = document.getElementById('targetYVal');
+    const setTargetButton = document.getElementById('setTargetButton');
+    const clearTargetsButton = document.getElementById('clearTargetsButton');
+    
+    targetXSlider.addEventListener('input', function() { targetXVal.textContent = targetXSlider.value; });
+    targetYSlider.addEventListener('input', function() { targetYVal.textContent = targetYSlider.value; });
+    
+    setTargetButton.addEventListener('click', function() {
+      const checkboxes = document.querySelectorAll('.target-checkbox');
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          const idx = cb.value;
+          targetInstructions[idx] = { x: parseFloat(targetXSlider.value), y: parseFloat(targetYSlider.value) };
+        }
+      });
+    });
+    
+    clearTargetsButton.addEventListener('click', function() {
+      targetInstructions = {};
+      document.querySelectorAll('.target-checkbox').forEach(cb => cb.checked = false);
+    });
+    
+    // --- Joint Limit Enforcement ---
+    function enforceJointLimit(constraint) {
+      const { bodyA, bodyB, defaultAngle, minAngle, maxAngle, jointType } = constraint;
+      const dx = bodyB.position.x - bodyA.position.x;
+      const dy = bodyB.position.y - bodyA.position.y;
+      let currentAngle = Math.atan2(dy, dx);
+      let angleDiff = currentAngle - defaultAngle;
+      angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+      
+      let correction = 0;
+      if (angleDiff < (minAngle - defaultAngle)) { correction = (minAngle - defaultAngle) - angleDiff; }
+      else if (angleDiff > (maxAngle - defaultAngle)) { correction = (maxAngle - defaultAngle) - angleDiff; }
+      if (correction !== 0) {
+        const torque = (jointType === 'hard' ? K_HARD : K_SOFT) * correction;
+        Body.setAngularVelocity(bodyA, bodyA.angularVelocity - torque);
+        Body.setAngularVelocity(bodyB, bodyB.angularVelocity + torque);
+      }
+    }
+    
+    // --- Engine Update ---
+    const forceFactor = 0.00005;
+    Events.on(engine, 'beforeUpdate', function() {
+      if (draggedBody && dragTarget) {
+        const diff = Vector.sub(dragTarget, draggedBody.position);
+        Body.applyForce(draggedBody, draggedBody.position, Vector.mult(diff, forceFactor));
+      }
+      for (const key in targetInstructions) {
+        const idx = parseInt(key);
+        const targetPos = targetInstructions[key];
+        const body = nodes[idx];
+        if (draggedBody === body) continue;
+        const diff = Vector.sub(targetPos, body.position);
+        Body.applyForce(body, body.position, Vector.mult(diff, forceFactor));
+      }
+      constraints.forEach(constraint => {
+        if (constraint.jointType) { enforceJointLimit(constraint); }
+      });
+    });
+    
+    // --- Node Orientation Update ---
+    // For every node, set its angle according to:
+    //   - Root (node 0): always point toward node 1.
+    //   - If exactly one child: point toward that child.
+    //   - Otherwise (zero or >1 children): point away from the parent (i.e. along the vector from parent to node).
+    Events.on(engine, 'afterUpdate', function() {
+      for (let i = 0; i < nodes.length; i++) {
+        let desiredAngle = 0;
+        if (i === 0) {
+          // Root: point toward next torso node (node 1)
+          const dx = nodes[1].position.x - nodes[0].position.x;
+          const dy = nodes[1].position.y - nodes[0].position.y;
+          desiredAngle = Math.atan2(dy, dx);
+        } else {
+          const info = hierarchy[i];
+          if (info.children.length === 1) {
+            // Exactly one child: point toward that child.
+            const childIndex = info.children[0];
+            const dx = nodes[childIndex].position.x - nodes[i].position.x;
+            const dy = nodes[childIndex].position.y - nodes[i].position.y;
+            desiredAngle = Math.atan2(dy, dx);
+          } else {
+            // Zero or more than one child: point away from parent.
+            const parentIndex = info.parent;
+            if (parentIndex !== null) {
+              const dx = nodes[i].position.x - nodes[parentIndex].position.x;
+              const dy = nodes[i].position.y - nodes[parentIndex].position.y;
+              desiredAngle = Math.atan2(dy, dx);
+            }
+          }
+        }
+        Body.setAngle(nodes[i], desiredAngle);
+      }
+    });
+    
+    // --- Image Attachment Functionality ---
+    // Each attachment: { image, nodes (array of node indices), mode ("hard", "deform", or "soft"),
+    // and for soft mode: baseHeight and baseWidth computed once. }
+    let imageAttachments = [];
+    
+    // For soft mode, compute the base dimensions only once upon image load,
+    // and pre-scale the image into an offscreen canvas.
+    function addImageToBone(imageURL, nodeIndices, mode) {
+      // mode: "hard" expects nodeIndices.length === 1,
+      // mode: "deform" expects nodeIndices.length === 3,
+      // mode: "soft" expects nodeIndices.length === 3 (defining the centerline for quadratic skinning)
+      const img = new Image();
+      img.src = imageURL;
+      img.onload = function() {
+        if (mode === 'soft') {
+          // Compute base dimensions from the positions of the "outside" nodes (first and third).
+          const A = nodes[nodeIndices[0]].position;
+          const C = nodes[nodeIndices[2]].position;
+          const dx = C.x - A.x, dy = C.y - A.y;
+          const baseHeight = Math.sqrt(dx*dx + dy*dy);
+          const baseWidth = baseHeight * (img.width / img.height);
+          // Pre-scale the image once using an offscreen canvas.
+          const offCanvas = document.createElement('canvas');
+          offCanvas.width = baseWidth;
+          offCanvas.height = baseHeight;
+          const offCtx = offCanvas.getContext('2d');
+          offCtx.drawImage(img, 0, 0, baseWidth, baseHeight);
+          imageAttachments.push({ image: offCanvas, nodes: nodeIndices, mode: mode, baseHeight: baseHeight, baseWidth: baseWidth });
+        } else {
+          imageAttachments.push({ image: img, nodes: nodeIndices, mode: mode });
+        }
+      };
+    }
+    
+    // Helper: Draw a textured triangle.
+    function drawTexturedTriangle(ctx, img, p0, p1, p2, t0, t1, t2) {
+      const D = t0.x*(t1.y - t2.y) + t1.x*(t2.y - t0.y) + t2.x*(t0.y - t1.y);
+      if (D === 0) return;
+      const a = (p0.x*(t1.y - t2.y) + p1.x*(t2.y - t0.y) + p2.x*(t0.y - t1.y)) / D;
+      const b = (p0.y*(t1.y - t2.y) + p1.y*(t2.y - t0.y) + p2.y*(t0.y - t1.y)) / D;
+      const c = (p0.x*(t2.x - t1.x) + p1.x*(t0.x - t2.x) + p2.x*(t1.x - t0.x)) / D;
+      const d = (p0.y*(t2.x - t1.x) + p1.y*(t0.x - t2.x) + p2.y*(t1.x - t0.x)) / D;
+      const e = (p0.x*(t1.x*t2.y - t2.x*t1.y) + p1.x*(t2.x*t0.y - t0.x*t2.y) + p2.x*(t0.x*t1.y - t1.x*t0.y)) / D;
+      const f = (p0.y*(t1.x*t2.y - t2.x*t1.y) + p1.y*(t2.x*t0.y - t0.x*t2.y) + p2.y*(t0.x*t1.y - t1.x*t0.y)) / D;
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.closePath();
+      ctx.clip();
+      ctx.transform(a, b, c, d, e, f);
+      ctx.drawImage(img, 0, 0);
+      ctx.restore();
+    }
+    
+    // Soft Image Mesh Warping:
+    // For soft mode, subdivide the image into a mesh using a quadratic Bezier based on three control nodes.
+    // Here we use a mesh of 5 rows and 10 columns.
+    // The stored baseWidth and baseHeight (from load time) are used for texture coordinates.
+    function drawSoftDeformedImage(ctx, attachment) {
+      const img = attachment.image;
+      const desiredHeight = attachment.baseHeight;
+      const desiredWidth = attachment.baseWidth;
+      
+      const rows = 5, cols = 10;
+      const dest = [];
+      const tex = [];
+      for (let i = 0; i <= rows; i++) {
+        dest[i] = [];
+        tex[i] = [];
+        const v = i / rows;
+        // Quadratic Bezier for centerline.
+        const cx = Math.pow(1-v,2)*nodes[attachment.nodes[0]].position.x +
+                   2*(1-v)*v*nodes[attachment.nodes[1]].position.x +
+                   Math.pow(v,2)*nodes[attachment.nodes[2]].position.x;
+        const cy = Math.pow(1-v,2)*nodes[attachment.nodes[0]].position.y +
+                   2*(1-v)*v*nodes[attachment.nodes[1]].position.y +
+                   Math.pow(v,2)*nodes[attachment.nodes[2]].position.y;
+        // Tangent derivative.
+        const tx = 2*(1-v)*(nodes[attachment.nodes[1]].position.x - nodes[attachment.nodes[0]].position.x) +
+                   2*v*(nodes[attachment.nodes[2]].position.x - nodes[attachment.nodes[1]].position.x);
+        const ty = 2*(1-v)*(nodes[attachment.nodes[1]].position.y - nodes[attachment.nodes[0]].position.y) +
+                   2*v*(nodes[attachment.nodes[2]].position.y - nodes[attachment.nodes[1]].position.y);
+        const len = Math.sqrt(tx*tx + ty*ty) || 1;
+        const nx = -ty / len;
+        const ny = tx / len;
+        for (let j = 0; j <= cols; j++) {
+          const u = j / cols;
+          const offset = (u - 0.5) * desiredWidth;
+          dest[i][j] = { x: cx + offset * nx, y: cy + offset * ny };
+          tex[i][j] = { x: u * desiredWidth, y: v * desiredHeight };
+        }
+      }
+      
+      // Draw each cell as two textured triangles.
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const p00 = dest[i][j], p10 = dest[i+1][j], p11 = dest[i+1][j+1], p01 = dest[i][j+1];
+          const t00 = tex[i][j], t10 = tex[i+1][j], t11 = tex[i+1][j+1], t01 = tex[i][j+1];
+          drawTexturedTriangle(ctx, img, p00, p10, p11, t00, t10, t11);
+          drawTexturedTriangle(ctx, img, p00, p11, p01, t00, t11, t01);
+        }
+      }
+    }
+    
+    // --- Custom Render for Image Attachments ---
+    Events.on(render, 'afterRender', function() {
+      const ctx = render.context;
+      imageAttachments.forEach(attachment => {
+        if (attachment.mode === 'hard' && attachment.nodes.length === 1) {
+          const node = nodes[attachment.nodes[0]];
+          ctx.save();
+          ctx.translate(node.position.x, node.position.y);
+          ctx.rotate(node.angle);
+          ctx.drawImage(attachment.image, -attachment.image.width/2, -attachment.image.height/2);
+          ctx.restore();
+        } else if (attachment.mode === 'deform' && attachment.nodes.length === 3) {
+          const p0 = nodes[attachment.nodes[0]].position;
+          const p1 = nodes[attachment.nodes[1]].position;
+          const p2 = nodes[attachment.nodes[2]].position;
+          const t0 = { x: 0, y: 0 };
+          const t1 = { x: attachment.image.width, y: 0 };
+          const t2 = { x: 0, y: attachment.image.height };
+          drawTexturedTriangle(ctx, attachment.image, p0, p1, p2, t0, t1, t2);
+        } else if (attachment.mode === 'soft' && attachment.nodes.length === 3) {
+          drawSoftDeformedImage(ctx, attachment);
+        }
+      });
+    });
+    
+    // --- Example Image Attachment Buttons ---
+    document.getElementById('addHardImage').addEventListener('click', function() {
+      // Hard mode: attach an image to the head (node index 3).
+      addImageToBone('https://via.placeholder.com/40x40?text=Head', [3], 'hard');
+    });
+    
+    document.getElementById('addDeformImage').addEventListener('click', function() {
+      // Read the three node indices for deform mode from the text input.
+      const indices = document.getElementById('deformNodeIndices').value.split(',')
+                        .map(s => parseInt(s.trim(), 10));
+      addImageToBone('https://via.placeholder.com/100x100?text=DeformArm', indices, 'deform');
+    });
+    
+    document.getElementById('addSoftImage').addEventListener('click', function() {
+      // Read the three node indices for soft mode from the text input.
+      const indices = document.getElementById('softNodeIndices').value.split(',')
+                        .map(s => parseInt(s.trim(), 10));
+      addImageToBone('https://img.freepik.com/free-photo/sensitive-hand-making-delicate-expressions_23-2149524497.jpg', indices, 'soft');
+    });
+    
+    // Toggle image mode for all attachments.
+    document.getElementById('toggleImageModeButton').addEventListener('click', function() {
+      imageAttachments.forEach(attachment => {
+        if (attachment.mode === 'hard' && attachment.nodes.length > 1) {
+          attachment.mode = 'deform';
+        } else if (attachment.mode === 'deform') {
+          attachment.mode = 'soft';
+        } else {
+          attachment.mode = 'hard';
+          attachment.nodes = [attachment.nodes[0]];
+        }
+      });
+    });
+    
+    // --- Draw Node Indices ---
+    // After all rendering, draw the node index near each node.
+    Events.on(render, 'afterRender', function() {
+      const ctx = render.context;
+      ctx.font = "12px sans-serif";
+      ctx.fillStyle = "black";
+      nodes.forEach((node, i) => {
+        ctx.fillText(i, node.position.x + 8, node.position.y - 8);
+      });
+    });
+    
+  </script>
+</body>
+</html>
