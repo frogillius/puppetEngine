@@ -677,28 +677,83 @@
     let imageAttachments = [];
     
     function addImageToBone(imageURL, nodeIndices, mode, scale) {
+      // Convert string input to an array of numbers if needed.
+      if (typeof nodeIndices === 'string') {
+        nodeIndices = nodeIndices.split(',').map(s => parseInt(s.trim(), 10));
+      }
+    
       const img = new Image();
       img.src = imageURL;
       img.onload = function() {
         if (mode === 'soft') {
-          // Soft mode logic remains unchanged.
-          const A = nodes[nodeIndices[0]].position;
-          const C = nodes[nodeIndices[2]].position;
-          const dx = C.x - A.x, dy = C.y - A.y;
-          const baseHeight = Math.sqrt(dx*dx + dy*dy);
+          const A_body = nodes[nodeIndices[0]];
+          const B_body = nodes[nodeIndices[1]];
+          const C_body = nodes[nodeIndices[2]];
+          
+          // Check that all nodes are defined.
+          if (!A_body || !B_body || !C_body) {
+            console.error("One or more node indices are invalid.", nodeIndices);
+            return;
+          }
+          
+          // Get the radii (or use default values)
+          const radiusA = A_body.circleRadius || 10;
+          const radiusC = C_body.circleRadius || 10;
+          
+          // Determine the bone lengths using the constraints.
+          let boneDistance1 = 0;
+          const constraintAB = constraints.find(c =>
+            (c.bodyA === A_body && c.bodyB === B_body) ||
+            (c.bodyB === A_body && c.bodyA === B_body)
+          );
+          if (constraintAB) {
+            boneDistance1 = constraintAB.length;
+          } else {
+            const dx1 = B_body.position.x - A_body.position.x;
+            const dy1 = B_body.position.y - A_body.position.y;
+            boneDistance1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+          }
+          
+          let boneDistance2 = 0;
+          const constraintBC = constraints.find(c =>
+            (c.bodyA === B_body && c.bodyB === C_body) ||
+            (c.bodyB === B_body && c.bodyA === C_body)
+          );
+          if (constraintBC) {
+            boneDistance2 = constraintBC.length;
+          } else {
+            const dx2 = C_body.position.x - B_body.position.x;
+            const dy2 = C_body.position.y - B_body.position.y;
+            boneDistance2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+          }
+          
+          // Calculate the baseHeight as the sum of the bone lengths plus radii.
+          const baseHeight = boneDistance1 + boneDistance2 + radiusA + radiusC;
           const baseWidth = baseHeight * (img.width / img.height);
+          
           const offCanvas = document.createElement('canvas');
           offCanvas.width = baseWidth;
           offCanvas.height = baseHeight;
           const offCtx = offCanvas.getContext('2d');
           offCtx.drawImage(img, 0, 0, baseWidth, baseHeight);
-          imageAttachments.push({ image: offCanvas, nodes: nodeIndices, mode: mode, baseHeight: baseHeight, baseWidth: baseWidth });
+          
+          // Store the attachment details.
+          imageAttachments.push({
+            image: offCanvas,
+            nodes: nodeIndices,
+            mode: mode,
+            baseHeight: baseHeight,
+            baseWidth: baseWidth,
+            radiusA: radiusA,
+            radiusC: radiusC
+          });
         } else {
-          // For hard mode, store the scale value.
+          // For 'hard' mode
           imageAttachments.push({ image: img, nodes: nodeIndices, mode: mode, scale: scale });
         }
       };
     }
+    
     
     
     function drawTexturedTriangle(ctx, img, p0, p1, p2, t0, t1, t2) {
@@ -727,44 +782,161 @@
       const img = attachment.image;
       const desiredHeight = attachment.baseHeight;
       const desiredWidth = attachment.baseWidth;
-      
-      const rows = 5, cols = 10;
+    
+      // Retrieve the three node bodies.
+      const A_body = nodes[attachment.nodes[0]];
+      const B_body = nodes[attachment.nodes[1]];
+      const C_body = nodes[attachment.nodes[2]];
+      const A = A_body.position;
+      const B = B_body.position;
+      const C = C_body.position;
+    
+      // Compute the normalized direction from A to C.
+      const dx = C.x - A.x, dy = C.y - A.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const dirX = dx / dist, dirY = dy / dist;
+    
+      // Adjust endpoints using the radii.
+      const radiusA = attachment.radiusA;
+      const radiusC = attachment.radiusC;
+      const A_prime = { x: A.x - dirX * radiusA, y: A.y - dirY * radiusA };
+      const C_prime = { x: C.x + dirX * radiusC, y: C.y + dirY * radiusC };
+    
+      // Compute the ideal midpoint (for a straight-line attachment)
+      // and then adjust it by the deviation of B.
+      const idealMid = { x: (A_prime.x + C_prime.x) / 2, y: (A_prime.y + C_prime.y) / 2 };
+      const origMid = { x: (A.x + C.x) / 2, y: (A.y + C.y) / 2 };
+      const deviation = { x: B.x - origMid.x, y: B.y - origMid.y };
+      const curvatureFactor = 1; // set to 0 for a straight line
+      const B_prime = {
+        x: idealMid.x + curvatureFactor * deviation.x,
+        y: idealMid.y + curvatureFactor * deviation.y
+      };
+    
+      // --- Global Top/Bottom Edge Correction ---
+      // Here we want to force the deformed grid’s top (v=0) and bottom (v=1)
+      // rows to land exactly where they should.
+      // We assume that in the “correct” (undeformed) mapping the spine is a straight line
+      // running from A′ (top) to C′ (bottom). We define a horizontal (u) direction
+      // as the unit vector perpendicular to that spine.
+      const spineDX = C_prime.x - A_prime.x;
+      const spineDY = C_prime.y - A_prime.y;
+      const spineLen = Math.sqrt(spineDX * spineDX + spineDY * spineDY) || 1;
+      // globalU is the horizontal direction (image’s x‑axis) for the attached image.
+      const globalU = { x: -spineDY / spineLen, y: spineDX / spineLen };
+    
+      // For the top edge (v=0), the center is at A′.
+      const topCenter = A_prime;
+      const topLeft = {
+        x: topCenter.x - (desiredWidth / 2) * globalU.x,
+        y: topCenter.y - (desiredWidth / 2) * globalU.y
+      };
+      const topRight = {
+        x: topCenter.x + (desiredWidth / 2) * globalU.x,
+        y: topCenter.y + (desiredWidth / 2) * globalU.y
+      };
+    
+      // For the bottom edge (v=1), the center is at C′.
+      const bottomCenter = C_prime;
+      const bottomLeft = {
+        x: bottomCenter.x - (desiredWidth / 2) * globalU.x,
+        y: bottomCenter.y - (desiredWidth / 2) * globalU.y
+      };
+      const bottomRight = {
+        x: bottomCenter.x + (desiredWidth / 2) * globalU.x,
+        y: bottomCenter.y + (desiredWidth / 2) * globalU.y
+      };
+    
+      // --- Build the Deformed Grid ---
+      // We use a (rows+1) x (cols+1) grid.
+      const rows = 10, cols = 10;
       const dest = [];
       const tex = [];
+      
       for (let i = 0; i <= rows; i++) {
         dest[i] = [];
         tex[i] = [];
         const v = i / rows;
-        const cx = Math.pow(1-v,2)*nodes[attachment.nodes[0]].position.x +
-                   2*(1-v)*v*nodes[attachment.nodes[1]].position.x +
-                   Math.pow(v,2)*nodes[attachment.nodes[2]].position.x;
-        const cy = Math.pow(1-v,2)*nodes[attachment.nodes[0]].position.y +
-                   2*(1-v)*v*nodes[attachment.nodes[1]].position.y +
-                   Math.pow(v,2)*nodes[attachment.nodes[2]].position.y;
-        const tx = 2*(1-v)*(nodes[attachment.nodes[1]].position.x - nodes[attachment.nodes[0]].position.x) +
-                   2*v*(nodes[attachment.nodes[2]].position.x - nodes[attachment.nodes[1]].position.x);
-        const ty = 2*(1-v)*(nodes[attachment.nodes[1]].position.y - nodes[attachment.nodes[0]].position.y) +
-                   2*v*(nodes[attachment.nodes[2]].position.y - nodes[attachment.nodes[1]].position.y);
-        const len = Math.sqrt(tx*tx + ty*ty) || 1;
-        const nx = -ty / len;
-        const ny = tx / len;
+    
+        // Compute the quadratic-interpolated spine (center) for this row.
+        const cx = Math.pow(1 - v, 2) * A_prime.x +
+                   2 * (1 - v) * v * B_prime.x +
+                   Math.pow(v, 2) * C_prime.x;
+        const cy = Math.pow(1 - v, 2) * A_prime.y +
+                   2 * (1 - v) * v * B_prime.y +
+                   Math.pow(v, 2) * C_prime.y;
+        
+        // Compute the local tangent of the spine.
+        const tx = 2 * (1 - v) * (B_prime.x - A_prime.x) +
+                   2 * v * (C_prime.x - B_prime.x);
+        const ty = 2 * (1 - v) * (B_prime.y - A_prime.y) +
+                   2 * v * (C_prime.y - B_prime.y);
+        const tangentLen = Math.sqrt(tx * tx + ty * ty) || 1;
+        const localNormal = { x: -ty / tangentLen, y: tx / tangentLen };
+    
         for (let j = 0; j <= cols; j++) {
           const u = j / cols;
-          const offset = (u - 0.5) * desiredWidth;
-          dest[i][j] = { x: cx + offset * nx, y: cy + offset * ny };
+          const offsetVal = (u - 0.5) * desiredWidth;
+          // This is the original computed position from the quadratic curve.
+          const computedPos = {
+            x: cx + offsetVal * localNormal.x,
+            y: cy + offsetVal * localNormal.y
+          };
+    
+          // --- Global (edge-corrected) position for top/bottom ---
+          // For each column (fixed u), determine where the vertex should be if
+          // the top and bottom edges were forced to their correct positions.
+          // Compute the top edge position at this u:
+          const topPos = {
+            x: topLeft.x + u * (topRight.x - topLeft.x),
+            y: topLeft.y + u * (topRight.y - topLeft.y)
+          };
+          // And the bottom edge position at this u:
+          const bottomPos = {
+            x: bottomLeft.x + u * (bottomRight.x - bottomLeft.x),
+            y: bottomLeft.y + u * (bottomRight.y - bottomLeft.y)
+          };
+          // Interpolate between top and bottom based on v.
+          const globalPos = {
+            x: (1 - v) * topPos.x + v * bottomPos.x,
+            y: (1 - v) * topPos.y + v * bottomPos.y
+          };
+    
+          // --- Blend the positions ---
+          // We want the top (v=0) and bottom (v=1) rows to use the globalPos exactly,
+          // while the midline (v=0.5) can use the computedPos.
+          // Here we use a blending factor that is 1 at v=0 and v=1 and 0 at v=0.5.
+          const edgeFactor = 1 - Math.sin(Math.PI * v); // sin(0)=0, sin(pi/2)=1, sin(pi)=0
+          const finalPos = {
+            x: computedPos.x * (1 - edgeFactor) + globalPos.x * edgeFactor,
+            y: computedPos.y * (1 - edgeFactor) + globalPos.y * edgeFactor
+          };
+    
+          dest[i][j] = finalPos;
           tex[i][j] = { x: u * desiredWidth, y: v * desiredHeight };
         }
       }
-      
+    
+      // --- Draw the Deformed Image ---
+      // Subdivide the grid into triangles and draw textured triangles.
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-          const p00 = dest[i][j], p10 = dest[i+1][j], p11 = dest[i+1][j+1], p01 = dest[i][j+1];
-          const t00 = tex[i][j], t10 = tex[i+1][j], t11 = tex[i+1][j+1], t01 = tex[i][j+1];
+          const p00 = dest[i][j],
+                p10 = dest[i + 1][j],
+                p11 = dest[i + 1][j + 1],
+                p01 = dest[i][j + 1];
+          const t00 = tex[i][j],
+                t10 = tex[i + 1][j],
+                t11 = tex[i + 1][j + 1],
+                t01 = tex[i][j + 1];
           drawTexturedTriangle(ctx, img, p00, p10, p11, t00, t10, t11);
           drawTexturedTriangle(ctx, img, p00, p11, p01, t00, t11, t01);
         }
       }
     }
+    
+    
+    
 	
 	
     
@@ -843,6 +1015,34 @@ Events.on(render, 'afterRender', function() {
   });
 });
 
+// --- Draw Target Instructions ---
+Events.on(render, 'afterRender', function() {
+  const ctx = render.context;
+  ctx.font = "12px sans-serif";
+  ctx.fillStyle = "red";
+  for (const key in targetInstructions) {
+    const idx = parseInt(key);
+    const targetPos = targetInstructions[key];
+    ctx.fillText(key, targetPos.x, targetPos.y);
+  }
+});
+
+
+// --- Define Textures ---
+function intitializeTextures() {
+  let url = "http://localhost:6969/testing/sbs/"
+  let args = null;
+
+  args = "0,1,2"
+  addImageToBone(url+"torso/torso.png", args, "soft");
+
+  /*
+  args = "0,4"
+  addImageToBone(url+"upperArm/upperArm.png", args, "hard", 0.05)
+  */
+}
+
+intitializeTextures();
 /*
 
 // --- After nodes are defined, store each node's initial position ---
