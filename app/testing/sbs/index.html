@@ -20,7 +20,7 @@
       width: 600px;
       height: 600px;
     }
-    label, button {
+    label, input[type="button"] {
       margin: 5px;
     }
     .sliderContainer {
@@ -30,9 +30,9 @@
       width: 100px;
       text-align: center;
     }
-	  #softNodeIndices {
-	    background-color: #10ff15;
-	  }
+    #softNodeIndices {
+      background-color: #10ff15;
+    }
   </style>
 </head>
 <body>
@@ -40,7 +40,7 @@
   
   <div id="controls">
     <label>
-      <input type="checkbox" id="gravityToggle" checked> Enable Gravity
+      <input type="checkbox" id="gravityToggle" checked autocomplete="off"> Enable Gravity
     </label>
   </div>
   
@@ -66,37 +66,69 @@
            14: Left Foot (LF)
            15: Right Foot (RF)
       -->
-      <label><input type="checkbox" value="0" class="target-checkbox"> Torso Top (T1)</label>
-      <label><input type="checkbox" value="1" class="target-checkbox"> Torso Middle (T2)</label>
-      <label><input type="checkbox" value="2" class="target-checkbox"> Torso Bottom (T3)</label>
-      <label><input type="checkbox" value="3" class="target-checkbox"> Head (H)</label>
-      <label><input type="checkbox" value="4" class="target-checkbox"> Left Arm Upper (LA1)</label>
-      <label><input type="checkbox" value="5" class="target-checkbox"> Left Arm Lower (LA2)</label>
-      <label><input type="checkbox" value="6" class="target-checkbox"> Right Arm Upper (RA1)</label>
-      <label><input type="checkbox" value="7" class="target-checkbox"> Right Arm Lower (RA2)</label>
-      <label><input type="checkbox" value="8" class="target-checkbox"> Left Leg Upper (LL1)</label>
-      <label><input type="checkbox" value="9" class="target-checkbox"> Left Leg Lower (LL2)</label>
-      <label><input type="checkbox" value="10" class="target-checkbox"> Right Leg Upper (RL1)</label>
-      <label><input type="checkbox" value="11" class="target-checkbox"> Right Leg Lower (RL2)</label>
-      <label><input type="checkbox" value="12" class="target-checkbox"> Left Hand (LH)</label>
-      <label><input type="checkbox" value="13" class="target-checkbox"> Right Hand (RH)</label>
-      <label><input type="checkbox" value="14" class="target-checkbox"> Left Foot (LF)</label>
-      <label><input type="checkbox" value="15" class="target-checkbox"> Right Foot (RF)</label>
+      <label>
+        <input type="checkbox" value="0" class="target-checkbox" autocomplete="off"> Torso Top (T1)
+      </label>
+      <label>
+        <input type="checkbox" value="1" class="target-checkbox" autocomplete="off"> Torso Middle (T2)
+      </label>
+      <label>
+        <input type="checkbox" value="2" class="target-checkbox" autocomplete="off"> Torso Bottom (T3)
+      </label>
+      <label>
+        <input type="checkbox" value="3" class="target-checkbox" autocomplete="off"> Head (H)
+      </label>
+      <label>
+        <input type="checkbox" value="4" class="target-checkbox" autocomplete="off"> Left Arm Upper (LA1)
+      </label>
+      <label>
+        <input type="checkbox" value="5" class="target-checkbox" autocomplete="off"> Left Arm Lower (LA2)
+      </label>
+      <label>
+        <input type="checkbox" value="6" class="target-checkbox" autocomplete="off"> Right Arm Upper (RA1)
+      </label>
+      <label>
+        <input type="checkbox" value="7" class="target-checkbox" autocomplete="off"> Right Arm Lower (RA2)
+      </label>
+      <label>
+        <input type="checkbox" value="8" class="target-checkbox" autocomplete="off"> Left Leg Upper (LL1)
+      </label>
+      <label>
+        <input type="checkbox" value="9" class="target-checkbox" autocomplete="off"> Left Leg Lower (LL2)
+      </label>
+      <label>
+        <input type="checkbox" value="10" class="target-checkbox" autocomplete="off"> Right Leg Upper (RL1)
+      </label>
+      <label>
+        <input type="checkbox" value="11" class="target-checkbox" autocomplete="off"> Right Leg Lower (RL2)
+      </label>
+      <label>
+        <input type="checkbox" value="12" class="target-checkbox" autocomplete="off"> Left Hand (LH)
+      </label>
+      <label>
+        <input type="checkbox" value="13" class="target-checkbox" autocomplete="off"> Right Hand (RH)
+      </label>
+      <label>
+        <input type="checkbox" value="14" class="target-checkbox" autocomplete="off"> Left Foot (LF)
+      </label>
+      <label>
+        <input type="checkbox" value="15" class="target-checkbox" autocomplete="off"> Right Foot (RF)
+      </label>
     </div>
     <div class="sliderContainer">
       <label>
-        Target X: <input type="range" id="targetX" min="0" max="600" value="300">
+        Target X: <input type="range" id="targetX" min="0" max="600" value="300" autocomplete="off">
         <span id="targetXVal">300</span>
       </label>
     </div>
     <div class="sliderContainer">
       <label>
-        Target Y: <input type="range" id="targetY" min="0" max="600" value="300">
+        Target Y: <input type="range" id="targetY" min="0" max="600" value="300" autocomplete="off">
         <span id="targetYVal">300</span>
       </label>
     </div>
-    <button id="setTargetButton">Set Target</button>
-    <button id="clearTargetsButton">Clear Targets</button>
+    <input type="button" id="setTargetButton" value="Set Target" autocomplete="off">
+    <input type="button" id="clearTargetsButton" value="Clear Targets" autocomplete="off">
   </div>
 
   <!-- UI for image attachments -->
@@ -104,28 +136,46 @@
     <h2>Image Attachments</h2>
     <p>
       You can attach an image via URL and specify which nodes control it.
-      In <strong>hard</strong> mode the image sticks to a single bone.
-      In <strong>deform</strong> mode the image is mapped with an affine transform using three nodes.
+      In <strong>hard</strong> mode the image sticks to a single bone and now requires a separate node to point to.
       In <strong>soft</strong> mode the image is subdivided into a mesh and deformed based on a quadratic–curve.
     </p>
     <div>
-      <button id="addHardImage">Add Hard Image to Head</button>
-    </div>
-    <div>
-      <button id="addDeformImage">Add Deform Image</button>
-      <label>Node indices (comma-separated): 
-        <input type="text" id="deformNodeIndices" value="4,5,12">
+      <input type="button" id="setImgSrc" value="Set image source" autocomplete="off">
+      <label>URL: 
+        <input type="text" id="imgURLInput" value="https://example.com/image.png" autocomplete="off">
       </label>
     </div>
     <div>
-      <button id="addSoftImage">Add Soft Image</button>
+      <!-- Updated hard image control now requires two node indices and a scale modifier -->
+      <input type="button" id="addHardImage" value="Add Hard Image" autocomplete="off">
+      <label>Attachment Node index: 
+        <input type="text" id="hardAttachmentNode" value="3" autocomplete="off">
+      </label>
+      <label>Point-to Node index: 
+        <input type="text" id="hardPointToNode" value="1" autocomplete="off">
+      </label>
+      <label>Scale: 
+        <input type="text" id="hardImageScale" value="1" autocomplete="off">
+      </label>
+    </div>
+    
+    <div>
+      <input type="button" id="addSoftImage" value="Add Soft Image" autocomplete="off">
       <label>Node indices (comma-separated): 
-        <input type="text" id="softNodeIndices" value="0,1,2">
+        <input type="text" id="softNodeIndices" value="0,1,2" autocomplete="off">
       </label>
     </div>
     <div>
-      <button id="toggleImageModeButton">Toggle Image Mode (for all attachments)</button>
+      <input type="button" id="removeImagesButton" value="Remove All Images" autocomplete="off">
     </div>
+  </div>
+  
+  <!-- Brain -->
+  <div id="brainControls">
+    <h2>brain controls</h2>
+    <!-- toggle brain -->
+    <label>Knock me out?</label>
+    <input type="checkbox" id="brainOn" autocomplete="off">
   </div>
   
   <div id="canvas-container"></div>
@@ -134,6 +184,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
   <script>
     // Module aliases.
+    let imgURL = null;
     const Engine = Matter.Engine,
           Render = Matter.Render,
           Runner = Matter.Runner,
@@ -278,8 +329,6 @@
     ];
     
     // --- Define a hierarchy for node orientation ---
-    // Each entry: { parent: parentIndex, children: [childIndices] }
-    // (Root is node 0; its “designated” child for orientation is node 1.)
     const hierarchy = {
       0: { parent: null, children: [1, 3, 4, 6] },
       1: { parent: 0, children: [2] },
@@ -597,28 +646,21 @@
     });
     
     // --- Node Orientation Update ---
-    // For every node, set its angle according to:
-    //   - Root (node 0): always point toward node 1.
-    //   - If exactly one child: point toward that child.
-    //   - Otherwise (zero or >1 children): point away from the parent (i.e. along the vector from parent to node).
     Events.on(engine, 'afterUpdate', function() {
       for (let i = 0; i < nodes.length; i++) {
         let desiredAngle = 0;
         if (i === 0) {
-          // Root: point toward next torso node (node 1)
           const dx = nodes[1].position.x - nodes[0].position.x;
           const dy = nodes[1].position.y - nodes[0].position.y;
           desiredAngle = Math.atan2(dy, dx);
         } else {
           const info = hierarchy[i];
           if (info.children.length === 1) {
-            // Exactly one child: point toward that child.
             const childIndex = info.children[0];
             const dx = nodes[childIndex].position.x - nodes[i].position.x;
             const dy = nodes[childIndex].position.y - nodes[i].position.y;
             desiredAngle = Math.atan2(dy, dx);
           } else {
-            // Zero or more than one child: point away from parent.
             const parentIndex = info.parent;
             if (parentIndex !== null) {
               const dx = nodes[i].position.x - nodes[parentIndex].position.x;
@@ -632,27 +674,19 @@
     });
     
     // --- Image Attachment Functionality ---
-    // Each attachment: { image, nodes (array of node indices), mode ("hard", "deform", or "soft"),
-    // and for soft mode: baseHeight and baseWidth computed once. }
     let imageAttachments = [];
     
-    // For soft mode, compute the base dimensions only once upon image load,
-    // and pre-scale the image into an offscreen canvas.
-    function addImageToBone(imageURL, nodeIndices, mode) {
-      // mode: "hard" expects nodeIndices.length === 1,
-      // mode: "deform" expects nodeIndices.length === 3,
-      // mode: "soft" expects nodeIndices.length === 3 (defining the centerline for quadratic skinning)
+    function addImageToBone(imageURL, nodeIndices, mode, scale) {
       const img = new Image();
       img.src = imageURL;
       img.onload = function() {
         if (mode === 'soft') {
-          // Compute base dimensions from the positions of the "outside" nodes (first and third).
+          // Soft mode logic remains unchanged.
           const A = nodes[nodeIndices[0]].position;
           const C = nodes[nodeIndices[2]].position;
           const dx = C.x - A.x, dy = C.y - A.y;
           const baseHeight = Math.sqrt(dx*dx + dy*dy);
           const baseWidth = baseHeight * (img.width / img.height);
-          // Pre-scale the image once using an offscreen canvas.
           const offCanvas = document.createElement('canvas');
           offCanvas.width = baseWidth;
           offCanvas.height = baseHeight;
@@ -660,12 +694,13 @@
           offCtx.drawImage(img, 0, 0, baseWidth, baseHeight);
           imageAttachments.push({ image: offCanvas, nodes: nodeIndices, mode: mode, baseHeight: baseHeight, baseWidth: baseWidth });
         } else {
-          imageAttachments.push({ image: img, nodes: nodeIndices, mode: mode });
+          // For hard mode, store the scale value.
+          imageAttachments.push({ image: img, nodes: nodeIndices, mode: mode, scale: scale });
         }
       };
     }
     
-    // Helper: Draw a textured triangle.
+    
     function drawTexturedTriangle(ctx, img, p0, p1, p2, t0, t1, t2) {
       const D = t0.x*(t1.y - t2.y) + t1.x*(t2.y - t0.y) + t2.x*(t0.y - t1.y);
       if (D === 0) return;
@@ -688,10 +723,6 @@
       ctx.restore();
     }
     
-    // Soft Image Mesh Warping:
-    // For soft mode, subdivide the image into a mesh using a quadratic Bezier based on three control nodes.
-    // Here we use a mesh of 5 rows and 10 columns.
-    // The stored baseWidth and baseHeight (from load time) are used for texture coordinates.
     function drawSoftDeformedImage(ctx, attachment) {
       const img = attachment.image;
       const desiredHeight = attachment.baseHeight;
@@ -704,14 +735,12 @@
         dest[i] = [];
         tex[i] = [];
         const v = i / rows;
-        // Quadratic Bezier for centerline.
         const cx = Math.pow(1-v,2)*nodes[attachment.nodes[0]].position.x +
                    2*(1-v)*v*nodes[attachment.nodes[1]].position.x +
                    Math.pow(v,2)*nodes[attachment.nodes[2]].position.x;
         const cy = Math.pow(1-v,2)*nodes[attachment.nodes[0]].position.y +
                    2*(1-v)*v*nodes[attachment.nodes[1]].position.y +
                    Math.pow(v,2)*nodes[attachment.nodes[2]].position.y;
-        // Tangent derivative.
         const tx = 2*(1-v)*(nodes[attachment.nodes[1]].position.x - nodes[attachment.nodes[0]].position.x) +
                    2*v*(nodes[attachment.nodes[2]].position.x - nodes[attachment.nodes[1]].position.x);
         const ty = 2*(1-v)*(nodes[attachment.nodes[1]].position.y - nodes[attachment.nodes[0]].position.y) +
@@ -727,7 +756,6 @@
         }
       }
       
-      // Draw each cell as two textured triangles.
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
           const p00 = dest[i][j], p10 = dest[i+1][j], p11 = dest[i+1][j+1], p01 = dest[i][j+1];
@@ -737,17 +765,25 @@
         }
       }
     }
+	
+	
     
-    // --- Custom Render for Image Attachments ---
     Events.on(render, 'afterRender', function() {
       const ctx = render.context;
       imageAttachments.forEach(attachment => {
-        if (attachment.mode === 'hard' && attachment.nodes.length === 1) {
-          const node = nodes[attachment.nodes[0]];
+        if (attachment.mode === 'hard' && attachment.nodes.length === 2) {
+          // For hard mode, use the first node as the attachment position and compute the angle toward the second node.
+          const attachNode = nodes[attachment.nodes[0]];
+          const pointToNode = nodes[attachment.nodes[1]];
+          const angle = Math.atan2(pointToNode.position.y - attachNode.position.y,
+                                     pointToNode.position.x - attachNode.position.x);
+          const scale = attachment.scale || 1;
+          const imgWidth = attachment.image.width * scale;
+          const imgHeight = attachment.image.height * scale;
           ctx.save();
-          ctx.translate(node.position.x, node.position.y);
-          ctx.rotate(node.angle);
-          ctx.drawImage(attachment.image, -attachment.image.width/2, -attachment.image.height/2);
+          ctx.translate(attachNode.position.x, attachNode.position.y);
+          ctx.rotate(angle);
+          ctx.drawImage(attachment.image, -imgWidth/2, -imgHeight/2, imgWidth, imgHeight);
           ctx.restore();
         } else if (attachment.mode === 'deform' && attachment.nodes.length === 3) {
           const p0 = nodes[attachment.nodes[0]].position;
@@ -763,51 +799,160 @@
       });
     });
     
+    // --- Image URL ---
+    document.getElementById('setImgSrc').addEventListener('click', function() {
+      imgURL = document.getElementById('imgURLInput').value;
+    });
+
     // --- Example Image Attachment Buttons ---
+    // Hard Image: now requires two node indices.
     document.getElementById('addHardImage').addEventListener('click', function() {
-      // Hard mode: attach an image to the head (node index 3).
-      addImageToBone('https://via.placeholder.com/40x40?text=Head', [3], 'hard');
+      const attachInput = document.getElementById('hardAttachmentNode').value;
+      const pointToInput = document.getElementById('hardPointToNode').value;
+      const scaleInput = document.getElementById('hardImageScale').value;
+      const attachNodeIndex = parseInt(attachInput, 10);
+      const pointToNodeIndex = parseInt(pointToInput, 10);
+      const scale = parseFloat(scaleInput);
+      if (isNaN(attachNodeIndex) || isNaN(pointToNodeIndex) || isNaN(scale)) {
+        alert("Please provide valid node indices and a numeric scale value for the hard image.");
+        return;
+      }
+      addImageToBone(imgURL, [attachNodeIndex, pointToNodeIndex], 'hard', scale);
     });
     
-    document.getElementById('addDeformImage').addEventListener('click', function() {
-      // Read the three node indices for deform mode from the text input.
-      const indices = document.getElementById('deformNodeIndices').value.split(',')
-                        .map(s => parseInt(s.trim(), 10));
-      addImageToBone('https://via.placeholder.com/100x100?text=DeformArm', indices, 'deform');
-    });
+    
     
     document.getElementById('addSoftImage').addEventListener('click', function() {
-      // Read the three node indices for soft mode from the text input.
       const indices = document.getElementById('softNodeIndices').value.split(',')
                         .map(s => parseInt(s.trim(), 10));
-      addImageToBone('https://img.freepik.com/free-photo/sensitive-hand-making-delicate-expressions_23-2149524497.jpg', indices, 'soft');
+      addImageToBone(imgURL, indices, 'soft');
     });
     
-    // Toggle image mode for all attachments.
-    document.getElementById('toggleImageModeButton').addEventListener('click', function() {
-      imageAttachments.forEach(attachment => {
-        if (attachment.mode === 'hard' && attachment.nodes.length > 1) {
-          attachment.mode = 'deform';
-        } else if (attachment.mode === 'deform') {
-          attachment.mode = 'soft';
-        } else {
-          attachment.mode = 'hard';
-          attachment.nodes = [attachment.nodes[0]];
-        }
-      });
+    document.getElementById('removeImagesButton').addEventListener('click', function() {
+      imageAttachments = [];
     });
+    
     
     // --- Draw Node Indices ---
-    // After all rendering, draw the node index near each node.
-    Events.on(render, 'afterRender', function() {
-      const ctx = render.context;
-      ctx.font = "12px sans-serif";
-      ctx.fillStyle = "black";
-      nodes.forEach((node, i) => {
-        ctx.fillText(i, node.position.x + 8, node.position.y - 8);
-      });
-    });
+Events.on(render, 'afterRender', function() {
+  const ctx = render.context;
+  ctx.font = "12px sans-serif";
+  ctx.fillStyle = "black";
+  nodes.forEach((node, i) => {
+    ctx.fillText(i, node.position.x + 8, node.position.y - 8);
+  });
+});
+
+/*
+
+// --- After nodes are defined, store each node's initial position ---
+const initialPositions = nodes.map(node => ({ x: node.position.x, y: node.position.y }));
+
+// --- Walking Animation Code Addressing All Nodes ---
+let walkCycleActive = true;
+let walkCycleTime = 0;
+
+ // animateWalkingFull(delta)
+ // This function computes a walking cycle (with a 2‑second period) that applies target offsets
+ // to every node. The torso advances horizontally with a gentle vertical bobbing,
+ // the head follows the torso, the arms swing opposite to each other, and the legs swing in counter‑phases.
+function animateWalkingFull(delta) {
+  walkCycleTime += delta;
+  const period = 2000; // Duration of one full cycle (in ms)
+  const cycle = (walkCycleTime % period) / period; // Normalized cycle (0 to 1)
+  const cycleRad = cycle * 2 * Math.PI;
+  
+  // Global horizontal forward movement:
+  const walkSpeed = 0.05; // pixels per millisecond
+  const globalX = walkCycleTime * walkSpeed;
+  
+  // Oscillation amplitudes:
+  const bobAmplitude = 5;         // vertical bobbing for torso & head
+  const armSwingAmplitude = 15;   // horizontal swing for arms
+  const legSwingAmplitude = 15;   // horizontal swing for legs
+
+  // --- Torso (nodes 0,1,2) ---
+  [0, 1, 2].forEach(i => {
+    targetInstructions[i] = {
+      x: initialPositions[i].x + globalX,
+      y: initialPositions[i].y + bobAmplitude * Math.sin(2 * cycleRad)
+    };
+  });
+
+  // --- Head (node 3) ---
+  targetInstructions[3] = {
+    x: initialPositions[3].x + globalX,
+    y: initialPositions[3].y + bobAmplitude * Math.sin(2 * cycleRad) - 2 // Slightly higher than torso bobbing
+  };
+
+  // --- Left Arm (nodes 4, 5, and left hand 12) ---
+  [4, 5, 12].forEach(i => {
+    targetInstructions[i] = {
+      x: initialPositions[i].x + globalX + armSwingAmplitude * Math.sin(cycleRad),
+      y: initialPositions[i].y
+    };
+  });
+
+  // --- Right Arm (nodes 6, 7, and right hand 13) ---
+  [6, 7, 13].forEach(i => {
+    targetInstructions[i] = {
+      x: initialPositions[i].x + globalX + armSwingAmplitude * Math.sin(cycleRad + Math.PI),
+      y: initialPositions[i].y
+    };
+  });
+
+  // --- Left Leg (nodes 8, 9, and left foot 14) ---
+  [8, 9, 14].forEach(i => {
+    targetInstructions[i] = {
+      x: initialPositions[i].x + globalX + legSwingAmplitude * Math.sin(cycleRad),
+      y: initialPositions[i].y
+    };
+  });
+
+  // --- Right Leg (nodes 10, 11, and right foot 15) ---
+  [10, 11, 15].forEach(i => {
+    targetInstructions[i] = {
+      x: initialPositions[i].x + globalX + legSwingAmplitude * Math.sin(cycleRad + Math.PI),
+      y: initialPositions[i].y
+    };
+  });
+}
+
+// --- Engine Update: Call the full-body walking animation ---
+Events.on(engine, 'beforeUpdate', function(event) {
+  if (walkCycleActive) {
+    animateWalkingFull(event.delta);
+  }
+  
+  // --- Existing code for dragging and joint limit enforcement ---
+  if (draggedBody && dragTarget) {
+    const diff = Vector.sub(dragTarget, draggedBody.position);
+    Body.applyForce(draggedBody, draggedBody.position, Vector.mult(diff, forceFactor));
+  }
+  for (const key in targetInstructions) {
+    const idx = parseInt(key);
+    const targetPos = targetInstructions[key];
+    const body = nodes[idx];
+    if (draggedBody === body) continue;
+    const diff = Vector.sub(targetPos, body.position);
+    Body.applyForce(body, body.position, Vector.mult(diff, forceFactor));
+  }
+  constraints.forEach(constraint => {
+    if (constraint.jointType) { enforceJointLimit(constraint); }
+  });
+});
+
+
+// Update the walking animation every engine update.
+Events.on(engine, 'beforeUpdate', function(event) {
+  if (walkCycleActive) {
+    animateWalkingFull(event.delta);
+  }
+});
     
+*/
   </script>
+
+
 </body>
 </html>
