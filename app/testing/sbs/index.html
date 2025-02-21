@@ -517,6 +517,8 @@
     });
     setJointLimits(rightFootConstraint, 'hard', 0.35);
     constraints.push(rightFootConstraint);
+
+    
     
     // Add nodes and constraints to the world.
     World.add(engine.world, nodes);
@@ -1067,6 +1069,7 @@ Events.on(render, 'afterRender', function() {
     ctx.fillText(key, targetPos.x, targetPos.y);
   }
 });
+
 
 
 // --- Define Textures ---
